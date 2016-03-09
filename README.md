@@ -1,5 +1,17 @@
 # Sebastiaan School API
 
+## Python Virtual Env recommended
+```
+pip install virtualenv
+virtualenv <DIR>
+source <DIR>/bin/activate
+```
+
+To deactiveate:
+```
+deactivate
+```
+
 ## Install
 
 Migrate the database the first boot and after every model change:

@@ -11,7 +11,7 @@ class AgendaItem(models.Model):
     end = models.DateTimeField()
 
     def __str__(self):
-        return self.title
+        return self.name
 
 class Bulletin(models.Model):
     title = models.CharField(max_length = 140)

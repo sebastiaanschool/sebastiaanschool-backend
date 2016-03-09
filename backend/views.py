@@ -16,7 +16,7 @@ class BulletinViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows bulletins to be viewed or edited.
     """
-    queryset = Bulletin.objects.all()
+    queryset = Bulletin.objects.all().order_by('-publishedAt')
     serializer_class = BulletinSerializer
 
 class ContactItemViewSet(viewsets.ModelViewSet):

@@ -9,7 +9,7 @@ class AgendaItemSerializer(serializers.HyperlinkedModelSerializer):
 class BulletinSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Bulletin
-        fields = ('title', 'body')
+        fields = ('title', 'body', 'publishedAt')
 
 class ContactItemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

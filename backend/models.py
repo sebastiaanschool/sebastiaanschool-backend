@@ -23,7 +23,7 @@ class Bulletin(models.Model):
 class ContactItem(models.Model):
     displayName = models.CharField(max_length = 140)
     email = models.CharField(max_length = 500)
-    order = models.IntegerField
+    order = models.IntegerField()
     detailText = models.CharField(max_length = 140)
 
     def __str__(self):

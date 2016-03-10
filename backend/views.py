@@ -22,18 +22,18 @@ class BulletinViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows bulletins to be viewed or edited.
 
-    Shows only bulletins where the publishedAt date is not in the future. Append `/all/` to the request path to include
+    Shows only bulletins where the publishedAt date is not in the future. Append `?all` to the request path to include
     future bulletins (admins only).
     """
-    queryset = Bulletin.objects.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
+    queryset = Bulletin.objects.all()
     serializer_class = BulletinSerializer
 
-    @list_route(permission_classes=[IsAdminUser])
-    def all(self, request):
-        selection = Bulletin.objects.all().order_by('-publishedAt')
-        serializer = self.get_serializer(selection, many=True)
-        return Response(serializer.data)
-
+    def get_queryset(self):
+      if self.request.user.is_superuser and 'all' in self.request.query_params:
+        selection = self.queryset.order_by('-publishedAt')
+      else:
+        selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
+      return selection
 
 class ContactItemViewSet(viewsets.ModelViewSet):
     """
@@ -46,14 +46,15 @@ class NewsLetterViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows news letters to be viewed or edited.
 
-    Shows only bulletins where the publishedAt date is not in the future. Append `/all/` to the request path to include
+    Shows only bulletins where the publishedAt date is not in the future. Append `?all` to the request path to include
     future newsletters (admins only).
     """
-    queryset = NewsLetter.objects.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
+    queryset = NewsLetter.objects.all()
     serializer_class = NewsLetterSerializer
 
-    @list_route(permission_classes=[IsAdminUser])
-    def all(self, request):
-        selection = NewsLetter.objects.all().order_by('-publishedAt')
-        serializer = self.get_serializer(selection, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+      if self.request.user.is_superuser and 'all' in self.request.query_params:
+        selection = self.queryset.order_by('-publishedAt')
+      else:
+        selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
+      return selection

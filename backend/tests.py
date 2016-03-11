@@ -8,7 +8,7 @@ from rest_framework.test import APITestCase
 from models import Bulletin
 
 
-class AccountTests(APITestCase):
+class BulletinTests(APITestCase):
     """
     To run tests: execute `python manage.py test` on the command line.
     """
@@ -43,7 +43,7 @@ class AccountTests(APITestCase):
             todays_bulletins = '[{"title":"Today\'s news","body":"Today is the day","publishedAt":"' + today_str + '"},{"title":"Last month\'s news","body":"Then was the day","publishedAt":"' + last_month_str + '"}]'
         )
 
-    def test_get_bulletins__returns_descending_order_up_to_today(self):
+    def test_get_bulletins_returns_descending_order_up_to_today(self):
         """
         Ensures that when we GET bulletins, they're in descending order by date, and future bulletins are not included.
         """
@@ -79,3 +79,33 @@ class AccountTests(APITestCase):
         response = self.client.get('/api/bulletins/', {'all': ''})
         response.render()
         self.assertEqual(response.content, self.expectations['all_bulletins'])
+
+    def test_post_bulletin_unauthenticated_is_not_allowed(self):
+        response = self.client.post('/api/bulletins/', {'title':'Access denied', 'body':'This is not acceptable', 'publishedAt':'2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_bulletin_as_normal_user_is_not_allowed(self):
+        self.client.login(username='mere-mortal', password='I have no power')
+        response = self.client.post('/api/bulletins/', {'title':'Access denied', 'body':'This is not acceptable', 'publishedAt':'2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_bulletin_as_admin_is_allowed(self):
+        self.client.login(username='admin', password='I have the power')
+        response = self.client.post('/api/bulletins/', {'title':'Access granted', 'body':'This is allowed', 'publishedAt':'2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Bulletin.objects.count(), 4)
+
+    def test_put_bulletin_unauthenticated_is_not_allowed(self):
+        response = self.client.put('/api/bulletins/', {'title':'Access denied', 'body':'This is not acceptable', 'publishedAt':'2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_put_bulletin_as_normal_user_is_not_allowed(self):
+        self.client.login(username='mere-mortal', password='I have no power')
+        response = self.client.put('/api/bulletins/', {'title':'Access denied', 'body':'This is not acceptable', 'publishedAt':'2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_put_bulletin_as_admin_is_not_allowed(self):
+        self.client.login(username='admin', password='I have the power')
+        response = self.client.put('/api/bulletins/', {'title':'Access denied', 'body':'This is not acceptable', 'publishedAt':'2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(Bulletin.objects.count(), 3)

@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-# Create your models here.
 
 class AgendaItem(models.Model):
     name = models.CharField(max_length = 140)
@@ -13,6 +12,7 @@ class AgendaItem(models.Model):
     def __str__(self):
         return self.name
 
+
 class Bulletin(models.Model):
     title = models.CharField(max_length = 140)
     body = models.TextField()
@@ -20,6 +20,7 @@ class Bulletin(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class ContactItem(models.Model):
     displayName = models.CharField(max_length = 140)
@@ -32,8 +33,8 @@ class ContactItem(models.Model):
 
 
 class NewsLetter(models.Model):
-    name =  models.CharField(max_length = 140)
-    url =  models.CharField(max_length = 500)
+    name = models.CharField(max_length = 140)
+    url = models.CharField(max_length = 500)
     publishedAt = models.DateTimeField()
 
     def __str__(self):

@@ -12,6 +12,13 @@ class AgendaItemViewSet(viewsets.ModelViewSet):
     queryset = AgendaItem.objects.all().order_by('-start')
     serializer_class = AgendaItemSerializer
 
+    def get_queryset(self):
+        if 'all' in self.request.query_params:
+            selection = self.queryset
+        else:
+            selection = self.queryset.exclude(start__lt=date.today())
+        return selection
+
 
 class BulletinViewSet(viewsets.ModelViewSet):
     """

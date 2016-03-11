@@ -5,7 +5,7 @@ from django.utils import timezone
 from pytz import utc
 from rest_framework.test import APITestCase
 
-from models import Bulletin, ContactItem, NewsLetter
+from models import AgendaItem, Bulletin, ContactItem, NewsLetter
 
 # To run tests: execute `python manage.py test` on the command line.
 
@@ -17,6 +17,83 @@ class Base(APITestCase):
     today_str = today.astimezone(utc).strftime('%Y-%m-%dT00:00:00Z')
     next_month_str = next_month.astimezone(utc).strftime('%Y-%m-%dT00:00:00Z')
     last_month_str = last_month.astimezone(utc).strftime('%Y-%m-%dT00:00:00Z')
+
+
+class AgendaItemTests(Base):
+
+    @classmethod
+    def setUpTestData(cls):
+        next_month_end = cls.next_month + timedelta(days=31)
+        next_month_end_str = next_month_end.astimezone(utc).strftime('%Y-%m-%dT00:00:00Z')
+        AgendaItem.objects.create(
+                name="This Month",
+                type="Event",
+                start=cls.today,
+                end=cls.next_month)
+        AgendaItem.objects.create(
+                name="Last Month",
+                type="Event",
+                start=cls.last_month,
+                end=cls.today)
+        AgendaItem.objects.create(
+                name="Next Month",
+                type="Event",
+                start=cls.next_month,
+                end=next_month_end)
+
+        User.objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
+        User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
+
+        cls.expectations = dict(
+            all_agenda_items='[{"name":"Next Month","type":"Event","start":"' + cls.next_month_str + '","end":"' + next_month_end_str + '"},{"name":"This Month","type":"Event","start":"' + cls.today_str + '","end":"' + cls.next_month_str + '"},{"name":"Last Month","type":"Event","start":"' + cls.last_month_str + '","end":"' + cls.today_str + '"}]',
+            coming_agenda_items='[{"name":"Next Month","type":"Event","start":"' + cls.next_month_str + '","end":"' + next_month_end_str + '"},{"name":"This Month","type":"Event","start":"' + cls.today_str + '","end":"' + cls.next_month_str + '"}]',
+        )
+
+    def test_get_agenda_items_returns_ascending_order_starting_today(self):
+        """
+        Ensures that when we GET agendaItems, they're in ascending order by date, and past agendaItems are not included.
+        """
+        response = self.client.get('/api/agendaItems/')
+        response.render()
+        self.assertEqual(response.content, self.expectations['coming_agenda_items'])
+
+    def test_get_all_agenda_items_returns_ascending_order(self):
+        """
+        Ensures that when we GET agendaItems?all, they're in ascending order by date, and past agendaItems are included.
+        """
+        response = self.client.get('/api/agendaItems/', {'all': ''})
+        response.render()
+        self.assertEqual(response.content, self.expectations['all_agenda_items'])
+
+    def test_post_agenda_item_unauthenticated_is_not_allowed(self):
+        response = self.client.post('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_agenda_item_as_normal_user_is_not_allowed(self):
+        self.client.login(username='mere-mortal', password='I have no power')
+        response = self.client.post('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_agenda_item_as_admin_is_allowed(self):
+        self.client.login(username='admin', password='I have the power')
+        response = self.client.post('/api/agendaItems/', {'name': 'Access granted', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(AgendaItem.objects.count(), 4)
+
+    def test_put_agenda_item_unauthenticated_is_not_allowed(self):
+        response = self.client.put('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_put_agenda_item_as_normal_user_is_not_allowed(self):
+        self.client.login(username='mere-mortal', password='I have no power')
+        response = self.client.put('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_put_agenda_item_as_admin_is_not_allowed(self):
+        self.client.login(username='admin', password='I have the power')
+        response = self.client.put('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(AgendaItem.objects.count(), 3)
 
 
 class BulletinTests(Base):

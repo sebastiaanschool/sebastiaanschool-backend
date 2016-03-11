@@ -1,4 +1,5 @@
 # Sebastiaan School API
+[![Build Status](https://travis-ci.org/sebastiaanschool/sebastiaanschool-backend.svg?branch=master)](https://travis-ci.org/sebastiaanschool/sebastiaanschool-backend)
 
 ## Python Virtual Env recommended
 ```

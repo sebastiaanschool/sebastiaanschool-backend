@@ -5,7 +5,7 @@ from backend.models import AgendaItem, Bulletin, ContactItem, NewsLetter
 class AgendaItemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = AgendaItem
-        fields = ('name', 'type', 'start' ,'end')
+        fields = ('name', 'type', 'start', 'end')
 
 
 class BulletinSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,7 +17,7 @@ class BulletinSerializer(serializers.HyperlinkedModelSerializer):
 class ContactItemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ContactItem
-        fields = ('displayName', 'email', 'order' ,'detailText')
+        fields = ('displayName', 'email', 'order', 'detailText')
 
 
 class NewsLetterSerializer(serializers.HyperlinkedModelSerializer):

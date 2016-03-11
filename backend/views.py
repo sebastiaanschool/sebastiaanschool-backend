@@ -31,11 +31,11 @@ class BulletinViewSet(viewsets.ModelViewSet):
     serializer_class = BulletinSerializer
 
     def get_queryset(self):
-      if self.request.user.is_superuser and 'all' in self.request.query_params:
-        selection = self.queryset.order_by('-publishedAt')
-      else:
-        selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
-      return selection
+        if self.request.user.is_superuser and 'all' in self.request.query_params:
+            selection = self.queryset.order_by('-publishedAt')
+        else:
+            selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
+        return selection
 
 
 class ContactItemViewSet(viewsets.ModelViewSet):
@@ -57,8 +57,8 @@ class NewsLetterViewSet(viewsets.ModelViewSet):
     serializer_class = NewsLetterSerializer
 
     def get_queryset(self):
-      if self.request.user.is_superuser and 'all' in self.request.query_params:
-        selection = self.queryset.order_by('-publishedAt')
-      else:
-        selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
-      return selection
+        if self.request.user.is_superuser and 'all' in self.request.query_params:
+            selection = self.queryset.order_by('-publishedAt')
+        else:
+            selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
+        return selection

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from textwrap import dedent
 
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -6,6 +7,7 @@ from pytz import utc
 from rest_framework.test import APITestCase
 
 from models import AgendaItem, Bulletin, ContactItem, NewsLetter
+
 
 # To run tests: execute `python manage.py test` on the command line.
 
@@ -45,8 +47,18 @@ class AgendaItemTests(Base):
         User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
 
         cls.expectations = dict(
-            all_agenda_items='[{"name":"Next Month","type":"Event","start":"' + cls.next_month_str + '","end":"' + next_month_end_str + '"},{"name":"This Month","type":"Event","start":"' + cls.today_str + '","end":"' + cls.next_month_str + '"},{"name":"Last Month","type":"Event","start":"' + cls.last_month_str + '","end":"' + cls.today_str + '"}]',
-            coming_agenda_items='[{"name":"Next Month","type":"Event","start":"' + cls.next_month_str + '","end":"' + next_month_end_str + '"},{"name":"This Month","type":"Event","start":"' + cls.today_str + '","end":"' + cls.next_month_str + '"}]',
+            all_agenda_items=dedent("""
+                [{"name":"Next Month","type":"Event","start":"%s","end":"%s"},
+                {"name":"This Month","type":"Event","start":"%s","end":"%s"},
+                {"name":"Last Month","type":"Event","start":"%s","end":"%s"}]""").replace('\n', '')
+                % (cls.next_month_str, next_month_end_str,
+                   cls.today_str, cls.next_month_str,
+                   cls.last_month_str, cls.today_str),
+            coming_agenda_items=dedent("""
+                [{"name":"Next Month","type":"Event","start":"%s","end":"%s"},
+                {"name":"This Month","type":"Event","start":"%s","end":"%s"}]""").replace('\n', '')
+                % (cls.next_month_str, next_month_end_str,
+                   cls.today_str, cls.next_month_str)
         )
 
     def test_get_agenda_items_returns_ascending_order_starting_today(self):
@@ -66,32 +78,50 @@ class AgendaItemTests(Base):
         self.assertEqual(response.content, self.expectations['all_agenda_items'])
 
     def test_post_agenda_item_unauthenticated_is_not_allowed(self):
-        response = self.client.post('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/agendaItems/', {'name': 'Access denied',
+                                                          'type': 'Event',
+                                                          'start': '2016-03-10T20:00:00Z',
+                                                          'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_agenda_item_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.post('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/agendaItems/', {'name': 'Access denied',
+                                                          'type': 'Event',
+                                                          'start': '2016-03-10T20:00:00Z',
+                                                          'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_agenda_item_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.post('/api/agendaItems/', {'name': 'Access granted', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/agendaItems/', {'name': 'Access granted',
+                                                          'type': 'Event',
+                                                          'start': '2016-03-10T20:00:00Z',
+                                                          'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 201)
         self.assertEqual(AgendaItem.objects.count(), 4)
 
     def test_put_agenda_item_unauthenticated_is_not_allowed(self):
-        response = self.client.put('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/agendaItems/', {'name': 'Access denied',
+                                                         'type': 'Event',
+                                                         'start': '2016-03-10T20:00:00Z',
+                                                         'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_agenda_item_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.put('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/agendaItems/', {'name': 'Access denied',
+                                                         'type': 'Event',
+                                                         'start': '2016-03-10T20:00:00Z',
+                                                         'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_agenda_item_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.put('/api/agendaItems/', {'name': 'Access denied', 'type': 'Event', 'start': '2016-03-10T20:00:00Z', 'end': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/agendaItems/', {'name': 'Access denied',
+                                                         'type': 'Event',
+                                                         'start': '2016-03-10T20:00:00Z',
+                                                         'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 405)
         self.assertEqual(AgendaItem.objects.count(), 3)
 
@@ -117,8 +147,15 @@ class BulletinTests(Base):
         User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
 
         cls.expectations = dict(
-            all_bulletins='[{"title":"Next month\'s news","body":"Then will be the day","publishedAt":"' + cls.next_month_str + '"},{"title":"Today\'s news","body":"Today is the day","publishedAt":"' + cls.today_str + '"},{"title":"Last month\'s news","body":"Then was the day","publishedAt":"' + cls.last_month_str + '"}]',
-            todays_bulletins = '[{"title":"Today\'s news","body":"Today is the day","publishedAt":"' + cls.today_str + '"},{"title":"Last month\'s news","body":"Then was the day","publishedAt":"' + cls.last_month_str + '"}]'
+            all_bulletins=dedent("""
+                [{"title":"Next month\'s news","body":"Then will be the day","publishedAt":"%s"},
+                {"title":"Today\'s news","body":"Today is the day","publishedAt":"%s"},
+                {"title":"Last month\'s news","body":"Then was the day","publishedAt":"%s"}]""").replace('\n', '')
+                % (cls.next_month_str, cls.today_str, cls.last_month_str),
+            todays_bulletins=dedent("""
+                [{"title":"Today\'s news","body":"Today is the day","publishedAt":"%s"},
+                {"title":"Last month\'s news","body":"Then was the day","publishedAt":"%s"}]""").replace('\n', '')
+                % (cls.today_str, cls.last_month_str)
         )
 
     def test_get_bulletins_returns_descending_order_up_to_today(self):
@@ -159,32 +196,44 @@ class BulletinTests(Base):
         self.assertEqual(response.content, self.expectations['all_bulletins'])
 
     def test_post_bulletin_unauthenticated_is_not_allowed(self):
-        response = self.client.post('/api/bulletins/', {'title': 'Access denied', 'body': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/bulletins/', {'title': 'Access denied',
+                                                        'body': 'This is not acceptable',
+                                                        'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.post('/api/bulletins/', {'title': 'Access denied', 'body': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/bulletins/', {'title': 'Access denied',
+                                                        'body': 'This is not acceptable',
+                                                        'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_bulletin_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.post('/api/bulletins/', {'title': 'Access granted', 'body': 'This is allowed', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/bulletins/', {'title': 'Access granted',
+                                                        'body': 'This is allowed',
+                                                        'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Bulletin.objects.count(), 4)
 
     def test_put_bulletin_unauthenticated_is_not_allowed(self):
-        response = self.client.put('/api/bulletins/', {'title': 'Access denied', 'body': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/bulletins/', {'title': 'Access denied',
+                                                       'body': 'This is not acceptable',
+                                                       'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.put('/api/bulletins/', {'title': 'Access denied', 'body': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/bulletins/', {'title': 'Access denied',
+                                                       'body': 'This is not acceptable',
+                                                       'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_bulletin_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.put('/api/bulletins/', {'title': 'Access denied', 'body': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/bulletins/', {'title': 'Access denied',
+                                                       'body': 'This is not acceptable',
+                                                       'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 405)
         self.assertEqual(Bulletin.objects.count(), 3)
 
@@ -213,7 +262,19 @@ class ContactItemTests(Base):
         User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
 
         cls.expectations = dict(
-            all_contacts='[{"displayName":"Anna Anderson","email":"aa@example.com","order":1,"detailText":"Anna always achieves awesomeness."},{"displayName":"Bernard Benson","email":"bb@example.com","order":2,"detailText":"Ben brilliantly bakes biscuits."},{"displayName":"Connie Carlson","email":"cc@example.com","order":3,"detailText":"Connie constantly causes confusion."}]',
+            all_contacts=dedent("""
+                [{"displayName":"Anna Anderson",
+                "email":"aa@example.com",
+                "order":1,
+                "detailText":"Anna always achieves awesomeness."},
+                {"displayName":"Bernard Benson",
+                "email":"bb@example.com",
+                "order":2,
+                "detailText":"Ben brilliantly bakes biscuits."},
+                {"displayName":"Connie Carlson",
+                "email":"cc@example.com",
+                "order":3,
+                "detailText":"Connie constantly causes confusion."}]""").replace('\n', ''),
         )
 
     def test_get_contact_items_returns_contacts_in_field_order(self):
@@ -225,32 +286,50 @@ class ContactItemTests(Base):
         self.assertEqual(response.content, self.expectations['all_contacts'])
 
     def test_post_contact_item_unauthenticated_is_not_allowed(self):
-        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson',
+                                                           'email': 'dd@example.com',
+                                                           'order': 4,
+                                                           'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_contact_item_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson',
+                                                           'email': 'dd@example.com',
+                                                           'order': 4,
+                                                           'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_contact_item_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson',
+                                                           'email': 'dd@example.com',
+                                                           'order': 4,
+                                                           'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 201)
         self.assertEqual(ContactItem.objects.count(), 4)
 
     def test_put_contact_item_unauthenticated_is_not_allowed(self):
-        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson',
+                                                          'email': 'dd@example.com',
+                                                          'order': 4,
+                                                          'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_contact_item_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson',
+                                                          'email': 'dd@example.com',
+                                                          'order': 4,
+                                                          'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_contact_item_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson',
+                                                          'email': 'dd@example.com',
+                                                          'order': 4,
+                                                          'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 405)
         self.assertEqual(ContactItem.objects.count(), 3)
 
@@ -276,13 +355,22 @@ class NewsletterTests(Base):
         User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
 
         cls.expectations = dict(
-            all_newsletters='[{"name":"Next month\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"' + cls.next_month_str + '"},{"name":"Today\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"' + cls.today_str + '"},{"name":"Last month\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"' + cls.last_month_str + '"}]',
-            todays_newsletters = '[{"name":"Today\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"' + cls.today_str + '"},{"name":"Last month\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"' + cls.last_month_str + '"}]'
+            all_newsletters=dedent("""
+                [{"name":"Next month\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"%s"},
+                {"name":"Today\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"%s"},
+                {"name":"Last month\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"%s"}]""")
+                .replace('\n', '')
+                % (cls.next_month_str, cls.today_str, cls.last_month_str),
+            todays_newsletters=dedent("""
+                [{"name":"Today\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"%s"},
+                {"name":"Last month\'s news","url":"https://github.com/sebastiaanschool","publishedAt":"%s"}]""")
+                .replace('\n', '')
+                % (cls.today_str, cls.last_month_str)
         )
 
     def test_get_newsletters_returns_descending_order_up_to_today(self):
         """
-        Ensures that when we GET newsletters, they're in descending order by date, and future newsletters are not included.
+        Ensures that when we GET newsletters, they're in descending order by date, and future ones are not included.
         """
         response = self.client.get('/api/newsLetters/')
         response.render()
@@ -290,7 +378,7 @@ class NewsletterTests(Base):
 
     def test_get_all_newsletters_unauthenticated_returns_descending_order_up_to_today(self):
         """
-        Ensures that when we GET newsletters?all anonymously, they're in descending order by date, and future newsletters
+        Ensures that when we GET newsletters?all anonymously, they're in descending order by date, and future ones
         are not included.
         """
         response = self.client.get('/api/newsLetters/', {'all': ''})
@@ -299,7 +387,7 @@ class NewsletterTests(Base):
 
     def test_get_all_newsletters_as_normal_user_returns_descending_order_up_to_today(self):
         """
-        Ensures that when we GET newsletters?all anonymously, they're in descending order by date, and future newsletters
+        Ensures that when we GET newsletters?all anonymously, they're in descending order by date, and future ones
         are not included.
         """
         self.client.login(username='mere-mortal', password='I have no power')
@@ -309,7 +397,7 @@ class NewsletterTests(Base):
 
     def test_get_all_newsletters_as_admin_returns_descending_order_including_future(self):
         """
-        Ensures that when we GET newsletters?all as admin, they're in descending order by date, and future newsletters are
+        Ensures that when we GET newsletters?all as admin, they're in descending order by date, and future ones are
         included.
         """
         self.client.login(username='admin', password='I have the power')
@@ -318,31 +406,43 @@ class NewsletterTests(Base):
         self.assertEqual(response.content, self.expectations['all_newsletters'])
 
     def test_post_bulletin_unauthenticated_is_not_allowed(self):
-        response = self.client.post('/api/newsLetters/', {'name': 'Access denied', 'url': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/newsLetters/', {'name': 'Access denied',
+                                                          'url': 'This is not acceptable',
+                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.post('/api/newsLetters/', {'name': 'Access denied', 'url': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/newsLetters/', {'name': 'Access denied',
+                                                          'url': 'This is not acceptable',
+                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_bulletin_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.post('/api/newsLetters/', {'name': 'Access granted', 'url': 'This is allowed', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.post('/api/newsLetters/', {'name': 'Access granted',
+                                                          'url': 'This is allowed',
+                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 201)
         self.assertEqual(NewsLetter.objects.count(), 4)
 
     def test_put_bulletin_unauthenticated_is_not_allowed(self):
-        response = self.client.put('/api/newsLetters/', {'name': 'Access denied', 'url': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/newsLetters/', {'name': 'Access denied',
+                                                         'url': 'This is not acceptable',
+                                                         'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.put('/api/newsLetters/', {'name': 'Access denied', 'url': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/newsLetters/', {'name': 'Access denied',
+                                                         'url': 'This is not acceptable',
+                                                         'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_bulletin_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.put('/api/newsLetters/', {'name': 'Access denied', 'url': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
+        response = self.client.put('/api/newsLetters/', {'name': 'Access denied',
+                                                         'url': 'This is not acceptable',
+                                                         'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 405)
         self.assertEqual(NewsLetter.objects.count(), 3)

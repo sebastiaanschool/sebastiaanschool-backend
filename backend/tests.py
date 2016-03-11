@@ -5,7 +5,7 @@ from django.utils import timezone
 from pytz import utc
 from rest_framework.test import APITestCase
 
-from models import Bulletin, NewsLetter
+from models import Bulletin, ContactItem, NewsLetter
 
 # To run tests: execute `python manage.py test` on the command line.
 
@@ -110,6 +110,72 @@ class BulletinTests(Base):
         response = self.client.put('/api/bulletins/', {'title': 'Access denied', 'body': 'This is not acceptable', 'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 405)
         self.assertEqual(Bulletin.objects.count(), 3)
+
+
+class ContactItemTests(Base):
+
+    @classmethod
+    def setUpTestData(cls):
+        ContactItem.objects.create(
+                displayName="Connie Carlson",
+                order=3,
+                email="cc@example.com",
+                detailText="Connie constantly causes confusion.")
+        ContactItem.objects.create(
+                displayName="Anna Anderson",
+                order=1,
+                email="aa@example.com",
+                detailText="Anna always achieves awesomeness.")
+        ContactItem.objects.create(
+                displayName="Bernard Benson",
+                order=2,
+                email="bb@example.com",
+                detailText="Ben brilliantly bakes biscuits.")
+
+        User.objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
+        User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
+
+        cls.expectations = dict(
+            all_contacts='[{"displayName":"Anna Anderson","email":"aa@example.com","order":1,"detailText":"Anna always achieves awesomeness."},{"displayName":"Bernard Benson","email":"bb@example.com","order":2,"detailText":"Ben brilliantly bakes biscuits."},{"displayName":"Connie Carlson","email":"cc@example.com","order":3,"detailText":"Connie constantly causes confusion."}]',
+        )
+
+    def test_get_contact_items_returns_contacts_in_field_order(self):
+        """
+        Ensures that when we GET contactItems, they're in ascending order by `order`.
+        """
+        response = self.client.get('/api/contactItems/')
+        response.render()
+        self.assertEqual(response.content, self.expectations['all_contacts'])
+
+    def test_post_contact_item_unauthenticated_is_not_allowed(self):
+        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_contact_item_as_normal_user_is_not_allowed(self):
+        self.client.login(username='mere-mortal', password='I have no power')
+        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_contact_item_as_admin_is_allowed(self):
+        self.client.login(username='admin', password='I have the power')
+        response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(ContactItem.objects.count(), 4)
+
+    def test_put_contact_item_unauthenticated_is_not_allowed(self):
+        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_put_contact_item_as_normal_user_is_not_allowed(self):
+        self.client.login(username='mere-mortal', password='I have no power')
+        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_put_contact_item_as_admin_is_not_allowed(self):
+        self.client.login(username='admin', password='I have the power')
+        response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson', 'email': 'dd@example.com', 'order': 4, 'detailText': 'David doesn\'t dance daily.'})
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(ContactItem.objects.count(), 3)
 
 
 class NewsletterTests(Base):

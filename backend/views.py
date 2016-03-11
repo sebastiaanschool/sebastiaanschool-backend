@@ -35,7 +35,7 @@ class ContactItemViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows contact items to be viewed or edited.
     """
-    queryset = ContactItem.objects.all()
+    queryset = ContactItem.objects.order_by('order').all()
     serializer_class = ContactItemSerializer
 
 

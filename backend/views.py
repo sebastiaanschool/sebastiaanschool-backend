@@ -1,15 +1,10 @@
-from django.shortcuts import render
 from datetime import date
-
-from rest_framework.decorators import list_route
-from rest_framework.permissions import IsAdminUser
-from rest_framework.response import Response
 
 from backend.models import AgendaItem, Bulletin, ContactItem, NewsLetter
 from rest_framework import viewsets
 from backend.serializers import AgendaItemSerializer, BulletinSerializer, ContactItemSerializer, NewsLetterSerializer
 
-# Create your views here.
+
 class AgendaItemViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows agenda items to be viewed or edited.
@@ -35,12 +30,14 @@ class BulletinViewSet(viewsets.ModelViewSet):
         selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
       return selection
 
+
 class ContactItemViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows contact items to be viewed or edited.
     """
     queryset = ContactItem.objects.all()
     serializer_class = ContactItemSerializer
+
 
 class NewsLetterViewSet(viewsets.ModelViewSet):
     """

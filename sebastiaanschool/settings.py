@@ -34,6 +34,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
+    # The test client sends JSON instead of `x-www-form-urlencoded` payloads by default.
     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 }
 

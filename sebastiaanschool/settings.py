@@ -62,6 +62,9 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Use ETAGs for lowering required network bandwidth.
+USE_ETAGS = True
+
 ROOT_URLCONF = 'sebastiaanschool.urls'
 
 TEMPLATES = [

@@ -2,7 +2,7 @@ import os
 
 from django.conf import settings
 
-DATA_DIR = os.environ.get('OPENSHIFT_DATA_DIR', settings.BASE_DIR)
+DATA_DIR = os.getenv('OPENSHIFT_DATA_DIR', settings.BASE_DIR)
 
 engines = {
     'sqlite': 'django.db.backends.sqlite3',
@@ -19,7 +19,7 @@ def config():
         engine = engines['sqlite']
     name = os.getenv('DATABASE_NAME')
     if not name and engine == engines['sqlite']:
-        name = os.path.join(settings.BASE_DIR, 'db.sqlite3')
+        name = os.path.join(DATA_DIR, 'db.sqlite3')
     return {
         'ENGINE': engine,
         'NAME': name,

@@ -4,13 +4,13 @@ from django.db import models
 
 
 class AgendaItem(models.Model):
-    name = models.CharField(max_length=140)
+    title = models.CharField(max_length=140)
     type = models.CharField(max_length=140)
     start = models.DateTimeField()
     end = models.DateTimeField()
 
     def __str__(self):
-        return self.name
+        return self.title
 
 
 class Bulletin(models.Model):
@@ -33,9 +33,9 @@ class ContactItem(models.Model):
 
 
 class NewsLetter(models.Model):
-    name = models.CharField(max_length=140)
+    title = models.CharField(max_length=140)
     url = models.CharField(max_length=500)
     publishedAt = models.DateTimeField()
 
     def __str__(self):
-        return self.name
+        return self.title

@@ -57,8 +57,7 @@ rhc ssh <app name>
 
 Then run these commands:
 ```
-pip install --upgrade django
-pip install --upgrade django-filter
+pip install -rrequirements.txt
 ```
 
 Now push your code.

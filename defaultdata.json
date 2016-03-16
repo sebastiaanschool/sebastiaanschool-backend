@@ -1,0 +1,636 @@
+[
+  {
+    "model": "backend.agendaitem",
+    "pk": 1,
+    "fields": {
+      "end": "2016-05-16T00:00:00Z",
+      "title": "Pinkstermaandag",
+      "start": "2016-05-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 2,
+    "fields": {
+      "end": "2016-01-20T00:00:00Z",
+      "title": "Start nationale voorleesdagen",
+      "start": "2016-01-20T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 3,
+    "fields": {
+      "end": "2015-08-31T00:00:00Z",
+      "title": "Start activiteit: opening van het schooljaar",
+      "start": "2015-08-31T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 4,
+    "fields": {
+      "end": "2015-10-16T00:00:00Z",
+      "title": "Open Podium en Nieuwsbrief",
+      "start": "2015-10-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 5,
+    "fields": {
+      "end": "2016-07-08T00:00:00Z",
+      "title": "Laatste schooldag :middag vrij",
+      "start": "2016-07-08T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 6,
+    "fields": {
+      "end": "2015-10-13T00:00:00Z",
+      "title": "Kijkmiddag: 15.00 - 15.30",
+      "start": "2015-10-13T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 7,
+    "fields": {
+      "end": "2015-10-01T00:00:00Z",
+      "title": "Studiedag",
+      "start": "2015-10-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 8,
+    "fields": {
+      "end": "2015-08-26T00:00:00Z",
+      "title": "Luizencontrole",
+      "start": "2015-08-26T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 9,
+    "fields": {
+      "end": "2016-05-05T00:00:00Z",
+      "title": "Hemelvaart",
+      "start": "2016-05-05T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 10,
+    "fields": {
+      "end": "2015-10-14T00:00:00Z",
+      "title": "Open dag",
+      "start": "2015-10-14T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 11,
+    "fields": {
+      "end": "2015-09-23T00:00:00Z",
+      "title": "Kinderpostzegels",
+      "start": "2015-09-23T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 12,
+    "fields": {
+      "end": "2016-01-25T00:00:00Z",
+      "title": "Studiedag: alle kinderen zijn vrij!",
+      "start": "2016-01-25T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 13,
+    "fields": {
+      "end": "2015-12-11T01:00:00Z",
+      "title": "Nieuwsbrief",
+      "start": "2015-12-11T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 14,
+    "fields": {
+      "end": "2015-09-28T00:00:00Z",
+      "title": "Voorlichting vervolgonderwijs: Sprengeloo",
+      "start": "2015-09-28T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 15,
+    "fields": {
+      "end": "2016-08-22T00:00:00Z",
+      "title": "Zomervakantie",
+      "start": "2016-07-11T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 16,
+    "fields": {
+      "end": "2016-01-15T00:00:00Z",
+      "title": "Nieuwsbrief",
+      "start": "2016-01-15T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 17,
+    "fields": {
+      "end": "2016-02-19T00:00:00Z",
+      "title": "Open podium",
+      "start": "2016-02-19T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 18,
+    "fields": {
+      "end": "2015-10-09T00:00:00Z",
+      "title": "Schoolkamp groep 8",
+      "start": "2015-10-07T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 19,
+    "fields": {
+      "end": "2016-05-06T00:00:00Z",
+      "title": "Tulpvakantie",
+      "start": "2016-04-25T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 20,
+    "fields": {
+      "end": "2015-12-14T01:00:00Z",
+      "title": "Adventviering",
+      "start": "2015-12-14T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 21,
+    "fields": {
+      "end": "2016-01-01T01:00:00Z",
+      "title": "Kerstvakantie",
+      "start": "2015-12-21T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 22,
+    "fields": {
+      "end": "2016-02-10T00:00:00Z",
+      "title": "Rapport",
+      "start": "2016-02-10T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 23,
+    "fields": {
+      "end": "2016-02-26T00:00:00Z",
+      "title": "Krokusvakantie",
+      "start": "2016-02-22T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 24,
+    "fields": {
+      "end": "2015-12-10T01:00:00Z",
+      "title": "Techniekmiddag",
+      "start": "2015-12-10T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 25,
+    "fields": {
+      "end": "2015-12-03T01:00:00Z",
+      "title": "Sinterklaas",
+      "start": "2015-12-03T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 26,
+    "fields": {
+      "end": "2015-12-07T01:00:00Z",
+      "title": "Adventviering",
+      "start": "2015-12-07T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 27,
+    "fields": {
+      "end": "2016-02-12T00:00:00Z",
+      "title": "Nieuwsbrief",
+      "start": "2016-02-12T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 28,
+    "fields": {
+      "end": "2015-10-05T00:00:00Z",
+      "title": "Dag van de leraar",
+      "start": "2015-10-05T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 29,
+    "fields": {
+      "end": "2015-12-18T01:00:00Z",
+      "title": "Kerstviering: Alle kinderen zijn 's middags vrij!",
+      "start": "2015-12-18T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 30,
+    "fields": {
+      "end": "2016-02-11T00:00:00Z",
+      "title": "Tien minutengesprekken",
+      "start": "2016-02-11T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 31,
+    "fields": {
+      "end": "2015-10-13T00:00:00Z",
+      "title": "Kijkles:8.30 - 9.00",
+      "start": "2015-10-13T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 32,
+    "fields": {
+      "end": "2015-10-28T01:00:00Z",
+      "title": "Luizencontrole",
+      "start": "2015-10-28T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 33,
+    "fields": {
+      "end": "2016-02-05T00:00:00Z",
+      "title": "Carnaval voor groep 1 t/m 4",
+      "start": "2016-02-05T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 34,
+    "fields": {
+      "end": "2015-10-06T00:00:00Z",
+      "title": "Schoolfotograaf",
+      "start": "2015-10-06T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 35,
+    "fields": {
+      "end": "2015-11-25T01:00:00Z",
+      "title": "Studiedag",
+      "start": "2015-11-25T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 36,
+    "fields": {
+      "end": "2015-12-02T01:00:00Z",
+      "title": "Workshop",
+      "start": "2015-12-02T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 37,
+    "fields": {
+      "end": "2015-11-13T01:00:00Z",
+      "title": "Nieuwsbrief",
+      "start": "2015-11-13T01:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 38,
+    "fields": {
+      "end": "2015-09-11T00:00:00Z",
+      "title": "Nieuwsbrief",
+      "start": "2015-09-11T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 39,
+    "fields": {
+      "end": "2015-09-14T00:00:00Z",
+      "title": "Informatie-avond",
+      "start": "2015-09-14T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 40,
+    "fields": {
+      "end": "2015-08-24T00:00:00Z",
+      "title": "1e schooldag",
+      "start": "2015-08-24T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.agendaitem",
+    "pk": 41,
+    "fields": {
+      "end": "2016-01-06T00:00:00Z",
+      "title": "Luizencontrole",
+      "start": "2016-01-06T00:00:00Z"
+    }
+  },
+  {
+    "model": "backend.bulletin",
+    "pk": 1,
+    "fields": {
+      "body": "Denkt u er aan dat het team een studiedag heeft op donderdag 1 oktober! Alle kinderen hebben dan vrij!!",
+      "title": "Donderdag  1oktober 2015",
+      "publishedAt": "2015-09-30T16:29:33.587Z"
+    }
+  },
+  {
+    "model": "backend.bulletin",
+    "pk": 2,
+    "fields": {
+      "body": "Er staat weer een nieuwe nieuwsbrief voor u klaar! Veel leesplezier!",
+      "title": "Nieuwsbrief februari 2016",
+      "publishedAt": "2016-02-12T07:49:47.883Z"
+    }
+  },
+  {
+    "model": "backend.bulletin",
+    "pk": 3,
+    "fields": {
+      "body": "U bent van harte welkom vanaf 11.00 uur! ",
+      "title": "Vandaag :16 oktober  Open Podium",
+      "publishedAt": "2015-10-16T06:40:23.614Z"
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 1,
+    "fields": {
+      "detailText": "Groep 1A en 2A",
+      "displayName": "Ninouk Hooijman",
+      "email": "n.hooijman@sebastiaanschool.nl",
+      "order": 4
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 2,
+    "fields": {
+      "detailText": "Locatiedirecteur",
+      "displayName": "Jantien Versteeg",
+      "email": "j.versteeg@sebastiaanschool.nl",
+      "order": 0
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 3,
+    "fields": {
+      "detailText": "Groep 1B en 2 B",
+      "displayName": "Daphne Tilstra",
+      "email": "d.tilstra@sebastiaanschool.nl",
+      "order": 5
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 4,
+    "fields": {
+      "detailText": "Groep 1A en 2A",
+      "displayName": "Mariska Busch",
+      "email": "m.busch@sebastiaanschool.nl",
+      "order": 3
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 5,
+    "fields": {
+      "detailText": "Groep 8",
+      "displayName": "Anouk Molendijk",
+      "email": "a.molendijk@sebastiaanschool.nl",
+      "order": 12
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 6,
+    "fields": {
+      "detailText": "Groep 3",
+      "displayName": "Mirjam Gaarman",
+      "email": "m.gaarman@sebastiaanschool.nl",
+      "order": 6
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 7,
+    "fields": {
+      "detailText": "groep 5",
+      "displayName": "Saira van der linde",
+      "email": "s.vanderlinde@veluwseonderwijsgroep.nl",
+      "order": 9
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 8,
+    "fields": {
+      "detailText": "Groep 5",
+      "displayName": "Karin Leenarts",
+      "email": "k.leenarts@sebastiaanschool.nl",
+      "order": 8
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 9,
+    "fields": {
+      "detailText": "Groep 4",
+      "displayName": "Rian de Laat",
+      "email": "r.delaat@sebastiaanschool.nl",
+      "order": 7
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 10,
+    "fields": {
+      "detailText": "groep 6 en 7",
+      "displayName": "Saira van der Linde",
+      "email": "s.vanderlinde@veluwseonderwijsgroep.nl",
+      "order": 11
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 11,
+    "fields": {
+      "detailText": "ICT",
+      "displayName": "Rob Bongers",
+      "email": "ict@sebastiaanschool.nl",
+      "order": 1
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 12,
+    "fields": {
+      "detailText": "Techniek",
+      "displayName": "Karin Leenarts-Proper",
+      "email": "k.leenarts@sebastiaanschool.nl",
+      "order": 2
+    }
+  },
+  {
+    "model": "backend.contactitem",
+    "pk": 13,
+    "fields": {
+      "detailText": "Groep 6 en 7",
+      "displayName": "Rob Bongers",
+      "email": "r.bongers@sebastiaanschool.nl",
+      "order": 10
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 1,
+    "fields": {
+      "title": "Juli 2015",
+      "publishedAt": "2015-07-04T04:03:01Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjuli2015nr9.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 2,
+    "fields": {
+      "title": "November 2015",
+      "publishedAt": "2015-11-13T10:08:19Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nieuwsbriefnov12015.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 3,
+    "fields": {
+      "title": "Januari 2016",
+      "publishedAt": "2016-01-17T12:25:39Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjan20162.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 4,
+    "fields": {
+      "title": "December 2015",
+      "publishedAt": "2015-12-12T15:58:24Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbdec2015.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 5,
+    "fields": {
+      "title": "Januari 2015",
+      "publishedAt": "2015-02-01T19:24:29Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjan2015205.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 6,
+    "fields": {
+      "title": "September 2015",
+      "publishedAt": "2015-09-11T12:52:03Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbseptnr12015.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 7,
+    "fields": {
+      "title": "Mei - Juni 2015",
+      "publishedAt": "2015-05-31T10:23:22Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmeijuni2015nr8.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 8,
+    "fields": {
+      "title": "April - Mei 2015",
+      "publishedAt": "2015-04-13T17:53:11Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbaprilmei2015nr7.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 10,
+    "fields": {
+      "title": "Maart 2015",
+      "publishedAt": "2015-03-13T18:06:00Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmaa2015nr6.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 11,
+    "fields": {
+      "title": "Februari 2016",
+      "publishedAt": "2016-02-12T07:47:13Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbfeb2016.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 12,
+    "fields": {
+      "title": "Maart 2016",
+      "publishedAt": "2016-03-11T12:07:05Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmaart2016.pdf"
+    }
+  },
+  {
+    "model": "backend.newsletter",
+    "pk": 13,
+    "fields": {
+      "title": "Oktober 2015",
+      "publishedAt": "2015-10-16T16:07:23Z",
+      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbokt2015nr2a.pdf"
+    }
+  }
+]

@@ -32,7 +32,7 @@ if 'OPENSHIFT_REPO_DIR' in os.environ:
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['sebastiaan-appforce1.rhcloud.com']
 
 
 REST_FRAMEWORK = {

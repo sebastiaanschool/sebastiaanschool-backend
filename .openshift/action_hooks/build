@@ -1,0 +1,3 @@
+if [ ! -d $OPENSHIFT_REPO_DIR/wsgi/static/collected_static ]; then
+    mkdir -p $OPENSHIFT_REPO_DIR/wsgi/static/collected_static
+fi

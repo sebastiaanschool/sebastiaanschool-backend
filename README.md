@@ -45,3 +45,37 @@ Explore the Django admin interface from `/admin/`. You'll need an admin account.
 ```
 python manage.py createsuperuser
 ```
+
+## Openshift
+
+Start with a Python 2.7 cartridge.
+
+Connect over SSH to the cartridge:
+```
+rhc ssh <app name>
+```
+
+Then run these commands:
+```
+pip install --upgrade django
+pip install --upgrade django-filter
+```
+
+Now push your code.
+
+Next connect through SSH again and run these commands:
+```
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+### DJANGO_SECRET_KEY
+On Openshift and other deployment environments, a fresh secret key should be set. This key must be kept private.
+
+### Data persistence
+
+You can deploy this application without a configured database in your OpenShift project, in which case Django will use a SQLite database that will live inside your application's data container, and persist only between redeploys of your container. This makes the gear non-scalable.
+
+For production it is recommended to use a properly configured database server or ask your OpenShift administrator to add one for you. Then use oc env to update the DATABASE_* environment variables in your DeploymentConfig to match your database settings.
+
+Redeploy your application to have your changes applied, and open the welcome page again to make sure your application is successfully connected to the database server.

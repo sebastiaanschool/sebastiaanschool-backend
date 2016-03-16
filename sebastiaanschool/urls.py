@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from rest_framework import routers
 from backend import views
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 
 router = routers.DefaultRouter()
 router.register(r'agendaItems', views.AgendaItemViewSet)
@@ -25,6 +26,7 @@ router.register(r'contactItems', views.ContactItemViewSet)
 router.register(r'newsLetters', views.NewsLetterViewSet)
 
 urlpatterns = [
+    url(r'^$', lambda r: HttpResponseRedirect('/api/')),
     url(r'^api/', include(router.urls)),
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))

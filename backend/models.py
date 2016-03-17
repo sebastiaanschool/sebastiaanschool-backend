@@ -34,7 +34,7 @@ class ContactItem(models.Model):
 
 class NewsLetter(models.Model):
     title = models.CharField(max_length=140)
-    url = models.CharField(max_length=500)
+    documentUrl = models.CharField(max_length=500)
     publishedAt = models.DateTimeField()
 
     def __str__(self):

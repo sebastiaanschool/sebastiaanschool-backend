@@ -531,7 +531,7 @@
     "fields": {
       "title": "Juli 2015",
       "publishedAt": "2015-07-04T04:03:01Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjuli2015nr9.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjuli2015nr9.pdf"
     }
   },
   {
@@ -540,7 +540,7 @@
     "fields": {
       "title": "November 2015",
       "publishedAt": "2015-11-13T10:08:19Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nieuwsbriefnov12015.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nieuwsbriefnov12015.pdf"
     }
   },
   {
@@ -549,7 +549,7 @@
     "fields": {
       "title": "Januari 2016",
       "publishedAt": "2016-01-17T12:25:39Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjan20162.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjan20162.pdf"
     }
   },
   {
@@ -558,7 +558,7 @@
     "fields": {
       "title": "December 2015",
       "publishedAt": "2015-12-12T15:58:24Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbdec2015.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbdec2015.pdf"
     }
   },
   {
@@ -567,7 +567,7 @@
     "fields": {
       "title": "Januari 2015",
       "publishedAt": "2015-02-01T19:24:29Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjan2015205.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbjan2015205.pdf"
     }
   },
   {
@@ -576,7 +576,7 @@
     "fields": {
       "title": "September 2015",
       "publishedAt": "2015-09-11T12:52:03Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbseptnr12015.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbseptnr12015.pdf"
     }
   },
   {
@@ -585,7 +585,7 @@
     "fields": {
       "title": "Mei - Juni 2015",
       "publishedAt": "2015-05-31T10:23:22Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmeijuni2015nr8.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmeijuni2015nr8.pdf"
     }
   },
   {
@@ -594,7 +594,7 @@
     "fields": {
       "title": "April - Mei 2015",
       "publishedAt": "2015-04-13T17:53:11Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbaprilmei2015nr7.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbaprilmei2015nr7.pdf"
     }
   },
   {
@@ -603,7 +603,7 @@
     "fields": {
       "title": "Maart 2015",
       "publishedAt": "2015-03-13T18:06:00Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmaa2015nr6.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmaa2015nr6.pdf"
     }
   },
   {
@@ -612,7 +612,7 @@
     "fields": {
       "title": "Februari 2016",
       "publishedAt": "2016-02-12T07:47:13Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbfeb2016.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbfeb2016.pdf"
     }
   },
   {
@@ -621,7 +621,7 @@
     "fields": {
       "title": "Maart 2016",
       "publishedAt": "2016-03-11T12:07:05Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmaart2016.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbmaart2016.pdf"
     }
   },
   {
@@ -630,7 +630,7 @@
     "fields": {
       "title": "Oktober 2015",
       "publishedAt": "2015-10-16T16:07:23Z",
-      "url": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbokt2015nr2a.pdf"
+      "documentUrl": "http://www.sebastiaanschool.nl/images/Documenten/pdf/nbokt2015nr2a.pdf"
     }
   }
 ]

@@ -9,7 +9,7 @@ class AgendaItemViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows agenda items to be viewed or edited.
     """
-    queryset = AgendaItem.objects.all().order_by('-start')
+    queryset = AgendaItem.objects.all()
     serializer_class = AgendaItemSerializer
 
     def get_queryset(self):
@@ -32,9 +32,9 @@ class BulletinViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if self.request.user.is_superuser and 'all' in self.request.query_params:
-            selection = self.queryset.order_by('-publishedAt')
+            selection = self.queryset
         else:
-            selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
+            selection = self.queryset.exclude(publishedAt__gt=date.today())
         return selection
 
 
@@ -42,7 +42,7 @@ class ContactItemViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows contact items to be viewed or edited.
     """
-    queryset = ContactItem.objects.order_by('order').all()
+    queryset = ContactItem.objects.all()
     serializer_class = ContactItemSerializer
 
 
@@ -58,7 +58,7 @@ class NewsLetterViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if self.request.user.is_superuser and 'all' in self.request.query_params:
-            selection = self.queryset.order_by('-publishedAt')
+            selection = self.queryset
         else:
-            selection = self.queryset.exclude(publishedAt__gt=date.today()).order_by('-publishedAt')
+            selection = self.queryset.exclude(publishedAt__gt=date.today())
         return selection

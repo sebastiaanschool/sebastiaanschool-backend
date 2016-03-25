@@ -12,6 +12,9 @@ class AgendaItem(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        ordering = ['-start']
+
 
 class Bulletin(models.Model):
     title = models.CharField(max_length=140)
@@ -20,6 +23,9 @@ class Bulletin(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['-publishedAt']
 
 
 class ContactItem(models.Model):
@@ -31,6 +37,9 @@ class ContactItem(models.Model):
     def __str__(self):
         return self.displayName
 
+    class Meta:
+        ordering = ['order']
+
 
 class NewsLetter(models.Model):
     title = models.CharField(max_length=140)
@@ -39,3 +48,6 @@ class NewsLetter(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['-publishedAt']

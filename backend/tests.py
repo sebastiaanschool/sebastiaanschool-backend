@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from pytz import utc
 from rest_framework.test import APITestCase
+from warnings import filterwarnings
 
 from models import AgendaItem, Bulletin, ContactItem, NewsLetter
 
@@ -464,3 +465,9 @@ class NewsletterTests(Base):
                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 405)
         self.assertEqual(NewsLetter.objects.count(), 3)
+
+
+# Make us get stack traces instead of just warnings for "naive datetime".
+filterwarnings(
+        'error', r"DateTimeField .* received a naive datetime",
+        RuntimeWarning, r'django\.db\.models\.fields')

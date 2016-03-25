@@ -1,7 +1,7 @@
-from datetime import date
+from django.utils import timezone
+from rest_framework import viewsets
 
 from backend.models import AgendaItem, Bulletin, ContactItem, NewsLetter
-from rest_framework import viewsets
 from backend.serializers import AgendaItemSerializer, BulletinSerializer, ContactItemSerializer, NewsLetterSerializer
 
 
@@ -16,7 +16,8 @@ class AgendaItemViewSet(viewsets.ModelViewSet):
         if 'all' in self.request.query_params:
             selection = self.queryset
         else:
-            selection = self.queryset.exclude(start__lt=date.today())
+            cutoff_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            selection = self.queryset.exclude(start__lt=cutoff_date)
         return selection
 
 
@@ -34,7 +35,7 @@ class BulletinViewSet(viewsets.ModelViewSet):
         if self.request.user.is_superuser and 'all' in self.request.query_params:
             selection = self.queryset
         else:
-            selection = self.queryset.exclude(publishedAt__gt=date.today())
+            selection = self.queryset.exclude(publishedAt__gt=timezone.now())
         return selection
 
 
@@ -60,5 +61,5 @@ class NewsLetterViewSet(viewsets.ModelViewSet):
         if self.request.user.is_superuser and 'all' in self.request.query_params:
             selection = self.queryset
         else:
-            selection = self.queryset.exclude(publishedAt__gt=date.today())
+            selection = self.queryset.exclude(publishedAt__gt=timezone.now())
         return selection

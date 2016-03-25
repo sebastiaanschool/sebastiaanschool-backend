@@ -24,6 +24,7 @@ router.register(r'agendaItems', views.AgendaItemViewSet)
 router.register(r'bulletins', views.BulletinViewSet)
 router.register(r'contactItems', views.ContactItemViewSet)
 router.register(r'newsLetters', views.NewsLetterViewSet)
+router.register(r'timeline', views.TimelineViewSet)
 
 urlpatterns = [
     url(r'^$', lambda r: HttpResponseRedirect('/api/')),

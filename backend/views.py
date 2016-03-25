@@ -1,8 +1,8 @@
 from django.utils import timezone
 from rest_framework import viewsets
 
-from backend.models import AgendaItem, Bulletin, ContactItem, NewsLetter
-from backend.serializers import AgendaItemSerializer, BulletinSerializer, ContactItemSerializer, NewsLetterSerializer
+from backend.models import AgendaItem, Bulletin, ContactItem, NewsLetter, TimelineItem
+from backend.serializers import AgendaItemSerializer, BulletinSerializer, ContactItemSerializer, NewsLetterSerializer, TimelineSerializer
 
 
 class AgendaItemViewSet(viewsets.ModelViewSet):
@@ -63,3 +63,24 @@ class NewsLetterViewSet(viewsets.ModelViewSet):
         else:
             selection = self.queryset.exclude(publishedAt__gt=timezone.now())
         return selection
+
+
+class TimelineViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint that returns newsletters and bulletins in a combined timeline.
+    """
+    cutoff_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    queryset = TimelineItem.objects.raw(
+        """
+        SELECT
+          id, 'bulletin' AS type, title, body, NULL AS documentUrl, publishedAt
+          FROM backend_bulletin
+          WHERE publishedAt >= %s
+        UNION SELECT
+          id, 'newsletter' AS type, title AS title, NULL AS body, documentUrl, publishedAt
+          FROM backend_newsletter
+          WHERE publishedAt >= %s
+        ORDER BY
+          publishedAt DESC
+        """, [cutoff_date, cutoff_date])
+    serializer_class = TimelineSerializer

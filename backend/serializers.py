@@ -24,3 +24,11 @@ class NewsLetterSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = NewsLetter
         fields = ('title', 'documentUrl', 'publishedAt', 'url')
+
+
+class TimelineSerializer(serializers.Serializer):
+    type = serializers.CharField()
+    title = serializers.CharField()
+    body = serializers.CharField(allow_blank=True)
+    documentUrl = serializers.CharField(allow_blank=True)
+    publishedAt = serializers.DateTimeField()

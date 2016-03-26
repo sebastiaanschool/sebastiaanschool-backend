@@ -69,17 +69,18 @@ class TimelineViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that returns newsletters and bulletins in a combined timeline.
     """
-    cutoff_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    from datetime import timedelta
+    cutoff_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
     queryset = TimelineItem.objects.raw(
         """
         SELECT
           id, 'bulletin' AS type, title, body, NULL AS documentUrl, publishedAt
           FROM backend_bulletin
-          WHERE publishedAt >= %s
+          WHERE publishedAt < %s
         UNION SELECT
           id, 'newsletter' AS type, title AS title, NULL AS body, documentUrl, publishedAt
           FROM backend_newsletter
-          WHERE publishedAt >= %s
+          WHERE publishedAt < %s
         ORDER BY
           publishedAt DESC
         """, [cutoff_date, cutoff_date])

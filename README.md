@@ -48,7 +48,32 @@ python manage.py createsuperuser
 
 ## Openshift
 
+### DJANGO_SECRET_KEY
+
+On Openshift and other deployment environments, a fresh secret key should be set. This key must be kept private.
+
+###Instructions
+
 Start with a Python 2.7 cartridge.
+```
+rhc create <app-name>
+```
+
+Next set some configuration items on the new app:
+```
+rhc set-env DJANGO_SECRET_KEY=<new secret key> --app <app-name>
+rhc set-env OPENSHIFT_PYTHON_WSGI_APPLICATION=sebastiaanschool/wsgi.py --app <app-name>
+```
+
+Add openshift as a remote
+```
+git remote add openshift <openshift ssh push URL>
+```
+
+Force push this repository. (Force to overwrite default checkout)
+```
+git push openshift --force
+```
 
 Connect over SSH to the cartridge:
 ```
@@ -57,19 +82,16 @@ rhc ssh <app name>
 
 Then run these commands:
 ```
-pip install -rrequirements.txt
-```
-
-Now push your code.
-
-Next connect through SSH again and run these commands:
-```
+cd $OPENSHIFT_REPO_DIR
+pip install -r requirements.txt
 python manage.py migrate
 python manage.py createsuperuser
+python manage.py loaddata defaultdata.json
 ```
-
-### DJANGO_SECRET_KEY
-On Openshift and other deployment environments, a fresh secret key should be set. This key must be kept private.
+Next, logout from the RHC ssh console. And restart your app:
+```
+rhc app restart <app name>
+```
 
 ### Data persistence
 

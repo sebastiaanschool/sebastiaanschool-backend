@@ -48,6 +48,10 @@ python manage.py createsuperuser
 
 ## Openshift
 
+### ALLOWED_HOSTS
+
+For Django deployed to a production environment, make sure the server URL is added to the ALLOWED_HOSTS setting in the file ```sebastiaanschool/settings.py``` and that ```DEBUG``` is ```False```.
+
 ### DJANGO_SECRET_KEY
 
 On Openshift and other deployment environments, a fresh secret key should be set. This key must be kept private.

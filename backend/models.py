@@ -50,7 +50,7 @@ class ContactItem(models.Model):
 
 
 @python_2_unicode_compatible
-class NewsLetter(Publication):
+class Newsletter(Publication):
     documentUrl = models.CharField(max_length=500)
 
     def __str__(self):

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from backend.models import AgendaItem, Bulletin, ContactItem, NewsLetter
+from backend.models import AgendaItem, Bulletin, ContactItem, Newsletter
 
 
 class AgendaItemSerializer(serializers.HyperlinkedModelSerializer):
@@ -20,9 +20,9 @@ class ContactItemSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('displayName', 'email', 'order', 'detailText', 'url')
 
 
-class NewsLetterSerializer(serializers.HyperlinkedModelSerializer):
+class NewsletterSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = NewsLetter
+        model = Newsletter
         fields = ('title', 'documentUrl', 'publishedAt', 'url')
 
 

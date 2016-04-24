@@ -7,7 +7,7 @@ from pytz import utc
 from rest_framework.test import APITestCase
 from warnings import filterwarnings
 
-from models import AgendaItem, Bulletin, ContactItem, NewsLetter
+from models import AgendaItem, Bulletin, ContactItem, Newsletter
 
 
 # To run tests: execute `python manage.py test` on the command line.
@@ -352,15 +352,15 @@ class NewsletterTests(Base):
 
     @classmethod
     def setUpTestData(cls):
-        NewsLetter.objects.create(
+        Newsletter.objects.create(
                 title="Today's news",
                 documentUrl="https://github.com/sebastiaanschool",
                 publishedAt=cls.today)
-        NewsLetter.objects.create(
+        Newsletter.objects.create(
                 title="Last month's news",
                 documentUrl="https://github.com/sebastiaanschool",
                 publishedAt=cls.last_month)
-        NewsLetter.objects.create(
+        Newsletter.objects.create(
                 title="Next month's news",
                 documentUrl="https://github.com/sebastiaanschool",
                 publishedAt=cls.next_month)
@@ -443,7 +443,7 @@ class NewsletterTests(Base):
                                                           'documentUrl': 'This is allowed',
                                                           'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(NewsLetter.objects.count(), 4)
+        self.assertEqual(Newsletter.objects.count(), 4)
 
     def test_put_bulletin_unauthenticated_is_not_allowed(self):
         response = self.client.put('/api/newsLetters/', {'title': 'Access denied',
@@ -464,7 +464,7 @@ class NewsletterTests(Base):
                                                          'documentUrl': 'This is not acceptable',
                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 405)
-        self.assertEqual(NewsLetter.objects.count(), 3)
+        self.assertEqual(Newsletter.objects.count(), 3)
 
 
 # Make us get stack traces instead of just warnings for "naive datetime".

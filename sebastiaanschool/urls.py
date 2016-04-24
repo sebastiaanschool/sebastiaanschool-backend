@@ -23,7 +23,7 @@ router = routers.DefaultRouter()
 router.register(r'agendaItems', views.AgendaItemViewSet)
 router.register(r'bulletins', views.BulletinViewSet)
 router.register(r'contactItems', views.ContactItemViewSet)
-router.register(r'newsLetters', views.NewsLetterViewSet)
+router.register(r'newsletters', views.NewsletterViewSet)
 router.register(r'timeline', views.TimelineViewSet)
 
 urlpatterns = [

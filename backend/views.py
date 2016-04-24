@@ -1,8 +1,8 @@
 from django.utils import timezone
 from rest_framework import viewsets
 
-from backend.models import AgendaItem, Bulletin, ContactItem, NewsLetter, TimelineItem
-from backend.serializers import AgendaItemSerializer, BulletinSerializer, ContactItemSerializer, NewsLetterSerializer, TimelineSerializer
+from backend.models import AgendaItem, Bulletin, ContactItem, Newsletter, TimelineItem
+from backend.serializers import AgendaItemSerializer, BulletinSerializer, ContactItemSerializer, NewsletterSerializer, TimelineSerializer
 
 
 class AgendaItemViewSet(viewsets.ModelViewSet):
@@ -47,15 +47,15 @@ class ContactItemViewSet(viewsets.ModelViewSet):
     serializer_class = ContactItemSerializer
 
 
-class NewsLetterViewSet(viewsets.ModelViewSet):
+class NewsletterViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows news letters to be viewed or edited.
 
     Shows only bulletins where the publishedAt date is not in the future. Append `?all` to the request path to include
     future newsletters (admins only).
     """
-    queryset = NewsLetter.objects.all()
-    serializer_class = NewsLetterSerializer
+    queryset = Newsletter.objects.all()
+    serializer_class = NewsletterSerializer
 
     def get_queryset(self):
         if self.request.user.is_superuser and 'all' in self.request.query_params:

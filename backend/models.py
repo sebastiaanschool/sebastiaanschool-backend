@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.utils.encoding import python_2_unicode_compatible
 
 from django.db import models
+from django.contrib import admin
 
 
 class Publication(models.Model):
@@ -26,6 +27,9 @@ class AgendaItem(models.Model):
     class Meta:
         ordering = ['-start']
 
+class AgendaItemAdmin(admin.ModelAdmin):
+    list_display = ('title', 'type')
+
 
 @python_2_unicode_compatible
 class Bulletin(Publication):
@@ -33,6 +37,9 @@ class Bulletin(Publication):
 
     def __str__(self):
         return self.title
+
+class BulletinAdmin(admin.ModelAdmin):
+    list_display = ('title', 'publishedAt')
 
 
 @python_2_unicode_compatible
@@ -48,6 +55,8 @@ class ContactItem(models.Model):
     class Meta:
         ordering = ['order']
 
+class ContactItemAdmin(admin.ModelAdmin):
+    list_display = ('displayName', 'email', 'order')
 
 @python_2_unicode_compatible
 class Newsletter(Publication):
@@ -55,6 +64,9 @@ class Newsletter(Publication):
 
     def __str__(self):
         return self.title
+
+class NewsletterAdmin(admin.ModelAdmin):
+    list_display = ('title', 'publishedAt', 'documentUrl')
 
 
 @python_2_unicode_compatible

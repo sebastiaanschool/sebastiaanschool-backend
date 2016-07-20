@@ -22,7 +22,7 @@ for op in \
          "$ENDPOINT/api/agendaItems/" \
          "$ENDPOINT/api/bulletins/" \
          "$ENDPOINT/api/contactItems/" \
-         "$ENDPOINT/api/newsLetters/" \
+         "$ENDPOINT/api/newsletters/" \
          "$ENDPOINT/api/timeline/"
 do
     echo "GET $op"

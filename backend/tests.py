@@ -467,6 +467,172 @@ class NewsletterTests(Base):
         self.assertEqual(Newsletter.objects.count(), 3)
 
 
+class UserTests(Base):
+
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user('one', None, 'password1')
+        User.objects.create_user('two', None, 'password2')
+
+    def test_can_create_user_anonymously(self):
+        """
+        Ensures that we can create a user anonymously, we get (201 created).
+        """
+        # TODO issue a HTTP POST to some endpoint
+        self.assertFalse(True) # TODO
+
+    def test_anonymous_user_cannot_GET_users(self):
+        """
+        Ensures that when we GET users?all anonymously, we get (401 unauthorized)
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_can_only_GET_self(self):
+        """
+        Ensures that when we GET users/?all while logged in, we get (200 ok + our own data ONLY).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_can_GET_self(self):
+        """
+        Ensures that when we GET users/one while logged in, we get (200 ok + our data).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_PUT_self(self):
+        """
+        Ensures that when we PUT users/one while logged in, we get (405 method not allowed)
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_POST_self(self):
+        """
+        Ensures that when we PUT users/one while logged in, we get (405 method not allowed)
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_can_DELETE_self(self):
+        """
+        Ensures that when we DELETE users/one while logged in, we get (204 no content) and the record is gone
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_GET_other(self):
+        """
+        Ensures that when we GET users/two while logged in, we get (403 forbidden)
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_PUT_other(self):
+        """
+        Ensures that when we PUT users/two while logged in, we get (405 method not allowed)
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_POST_other(self):
+        """
+        Ensures that when we PUT users/two while logged in, we get (405 method not allowed)
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_DELETE_other(self):
+        """
+        Ensures that when we DELETE users/two while logged in, we get (403 forbidden)
+        """
+        self.assertFalse(True) # TODO
+
+
+class UserDeviceTests(Base):
+
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user('one', None, 'password1')
+
+    def test_cannot_GET_all_user_devices_anonymously(self):
+        """
+        Ensures that when we GET user-devices/?all anonymously, we get (401 unauthorized).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_cannot_GET_user_device_anonymously(self):
+        """
+        Ensures that when we GET user-devices?mine anonymously, we get (401 unauthorized).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_cannot_PUT_user_device_anonymously(self):
+        """
+        Ensures that when we PUT user-devices?mine anonymously, we get (401 unauthorized).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_cannot_POST_user_device_anonymously(self):
+        """
+        Ensures that when we DELETE user-devices?mine anonymously, we get (401 unauthorized).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_cannot_DELETE_user_device_anonymously(self):
+        """
+        Ensures that when we DELETE user-devices?mine anonymously, we get (401 unauthorized).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_can_only_GET_self(self):
+        """
+        Ensures that when we GET user-devices?all while logged in, we get (200 ok + our own data ONLY).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_can_GET_self(self):
+        """
+        Ensures that when we GET user-devices?mine while logged in, we get (200 ok + our data).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_PUT_self(self):
+        """
+        Ensures that when we PUT user-devices?mine while logged in, we get (405 method not allowed).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_POST_self(self):
+        """
+        Ensures that when we POST user-devices?mine while logged in, we get (200 ok + updated data).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_can_DELETE_self(self):
+        """
+        Ensures that when we DELETE user-devices?mine while logged in, we get (204 no content) and the record is gone
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_GET_other(self):
+        """
+        Ensures that when we GET user-devices/<record_id> while logged in, we get (400 bad request).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_PUT_other(self):
+        """
+        Ensures that when we PUT user-devices/<record_id> while logged in, we get (400 bad request).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_POST_other(self):
+        """
+        Ensures that when we POST user-devices/<record_id> while logged in, we get (400 bad request).
+        """
+        self.assertFalse(True) # TODO
+
+    def test_normal_user_cannot_DELETE_other(self):
+        """
+        Ensures that when we DELETE user-devices/<record_id> while logged in, we get (400 bad request).
+        """
+        self.assertFalse(True) # TODO
+
+
 # Make us get stack traces instead of just warnings for "naive datetime".
 filterwarnings(
         'error', r"DateTimeField .* received a naive datetime",

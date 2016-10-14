@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 from django.utils.encoding import python_2_unicode_compatible
 
 from django.db import models
+from django.contrib import admin
+from django.contrib.auth import get_user_model
 
 
 class Publication(models.Model):
@@ -71,3 +73,39 @@ class TimelineItem(Publication):
 
     class Meta:
         managed = False    # This model class has no table of its own.
+
+
+class UserDevice(models.Model):
+    """
+    Push notification settings for a user (more accurately: for a device).
+
+    Note: username/password pairs are random strings, apps enroll into django behind the scenes. Therefore there is no
+    point in having a OneToMany from User to UserDevice; every device is a new user (also every app reset).
+
+    HTTP Access Patterns
+    ====================
+    these records are tied to a user account and inaccessible to any other user. There should be no constructable
+    location URI; direct reference is undesirable because it forces the client to have knowledge of the record ID. It
+    doesn't need to know. Therefore:
+
+    - GET    /user-devices?mine        --> 200 OK + Data
+    - POST   /user-devices?mine        --> 200 OK + Updated Data
+    - DELETE /user-devices?mine        --> 204 No Content
+    - PUT    /user-devices?mine        --> 405 Method Not Allowed
+    - *      /user-devices/<record-id> --> 400 Bad Request
+    - GET    /user-devices?all         --> 200 OK + Our Data
+    - *      /user-devices?all         --> 403 Forbidden
+    """
+    user = models.OneToOneField(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+    wants_push_notifications = models.BooleanField(default=False)
+    firebase_instance_id = models.CharField(max_length=256, null=True)
+
+    # No need for Manufacturer, Model, etc. We track those via normal analytics, if at all.
+
+
+class UserDeviceAdmin(admin.ModelAdmin):
+    pass

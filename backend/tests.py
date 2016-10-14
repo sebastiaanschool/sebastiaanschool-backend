@@ -371,18 +371,18 @@ class NewsletterTests(Base):
         cls.expectations = dict(
             all_newsletters=dedent("""
                 [{"title":"Next month\'s news","documentUrl":"https://github.com/sebastiaanschool"
-                ,"publishedAt":"%s","url":"http://testserver/api/newsLetters/3/"},
+                ,"publishedAt":"%s","url":"http://testserver/api/newsletters/3/"},
                 {"title":"Today\'s news","documentUrl":"https://github.com/sebastiaanschool"
-                ,"publishedAt":"%s","url":"http://testserver/api/newsLetters/1/"},
+                ,"publishedAt":"%s","url":"http://testserver/api/newsletters/1/"},
                 {"title":"Last month\'s news","documentUrl":"https://github.com/sebastiaanschool"
-                ,"publishedAt":"%s","url":"http://testserver/api/newsLetters/2/"}]""")
+                ,"publishedAt":"%s","url":"http://testserver/api/newsletters/2/"}]""")
                 .replace('\n', '')
                 % (cls.next_month_str, cls.today_str, cls.last_month_str),
             todays_newsletters=dedent("""
                 [{"title":"Today\'s news","documentUrl":"https://github.com/sebastiaanschool"
-                ,"publishedAt":"%s","url":"http://testserver/api/newsLetters/1/"},
+                ,"publishedAt":"%s","url":"http://testserver/api/newsletters/1/"},
                 {"title":"Last month\'s news","documentUrl":"https://github.com/sebastiaanschool"
-                ,"publishedAt":"%s","url":"http://testserver/api/newsLetters/2/"}]""")
+                ,"publishedAt":"%s","url":"http://testserver/api/newsletters/2/"}]""")
                 .replace('\n', '')
                 % (cls.today_str, cls.last_month_str)
         )
@@ -391,7 +391,7 @@ class NewsletterTests(Base):
         """
         Ensures that when we GET newsletters, they're in descending order by date, and future ones are not included.
         """
-        response = self.client.get('/api/newsLetters/')
+        response = self.client.get('/api/newsletters/')
         response.render()
         self.assertEqual(response.content, self.expectations['todays_newsletters'])
 
@@ -400,7 +400,7 @@ class NewsletterTests(Base):
         Ensures that when we GET newsletters?all anonymously, they're in descending order by date, and future ones
         are not included.
         """
-        response = self.client.get('/api/newsLetters/', {'all': ''})
+        response = self.client.get('/api/newsletters/', {'all': ''})
         response.render()
         self.assertEqual(response.content, self.expectations['todays_newsletters'])
 
@@ -410,7 +410,7 @@ class NewsletterTests(Base):
         are not included.
         """
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.get('/api/newsLetters/', {'all': ''})
+        response = self.client.get('/api/newsletters/', {'all': ''})
         response.render()
         self.assertEqual(response.content, self.expectations['todays_newsletters'])
 
@@ -420,47 +420,47 @@ class NewsletterTests(Base):
         included.
         """
         self.client.login(username='admin', password='I have the power')
-        response = self.client.get('/api/newsLetters/', {'all': ''})
+        response = self.client.get('/api/newsletters/', {'all': ''})
         response.render()
         self.assertEqual(response.content, self.expectations['all_newsletters'])
 
     def test_post_bulletin_unauthenticated_is_not_allowed(self):
-        response = self.client.post('/api/newsLetters/', {'title': 'Access denied',
+        response = self.client.post('/api/newsletters/', {'title': 'Access denied',
                                                           'documentUrl': 'This is not acceptable',
                                                           'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.post('/api/newsLetters/', {'title': 'Access denied',
+        response = self.client.post('/api/newsletters/', {'title': 'Access denied',
                                                           'documentUrl': 'This is not acceptable',
                                                           'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_post_bulletin_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.post('/api/newsLetters/', {'title': 'Access granted',
+        response = self.client.post('/api/newsletters/', {'title': 'Access granted',
                                                           'documentUrl': 'This is allowed',
                                                           'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Newsletter.objects.count(), 4)
 
     def test_put_bulletin_unauthenticated_is_not_allowed(self):
-        response = self.client.put('/api/newsLetters/', {'title': 'Access denied',
+        response = self.client.put('/api/newsletters/', {'title': 'Access denied',
                                                          'documentUrl': 'This is not acceptable',
                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
-        response = self.client.put('/api/newsLetters/', {'title': 'Access denied',
+        response = self.client.put('/api/newsletters/', {'title': 'Access denied',
                                                          'documentUrl': 'This is not acceptable',
                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
     def test_put_bulletin_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
-        response = self.client.put('/api/newsLetters/', {'title': 'Access denied',
+        response = self.client.put('/api/newsletters/', {'title': 'Access denied',
                                                          'documentUrl': 'This is not acceptable',
                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 405)

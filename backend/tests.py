@@ -1,13 +1,13 @@
 from datetime import timedelta
 from textwrap import dedent
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from pytz import utc
 from rest_framework.test import APITestCase
 from warnings import filterwarnings
 
-from models import AgendaItem, Bulletin, ContactItem, Newsletter
+from models import AgendaItem, Bulletin, ContactItem, Newsletter, UserDevice
 
 
 # To run tests: execute `python manage.py test` on the command line.
@@ -44,8 +44,8 @@ class AgendaItemTests(Base):
                 start=cls.next_month,
                 end=next_month_end)
 
-        User.objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
-        User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
+        get_user_model().objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
+        get_user_model().objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
 
         cls.expectations = dict(
             all_agenda_items=dedent("""
@@ -149,8 +149,8 @@ class BulletinTests(Base):
                 body="Then will be the day",
                 publishedAt=cls.next_month)
 
-        User.objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
-        User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
+        get_user_model().objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
+        get_user_model().objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
 
         cls.expectations = dict(
             all_bulletins=dedent("""
@@ -269,8 +269,8 @@ class ContactItemTests(Base):
                 email="bb@example.com",
                 detailText="Ben brilliantly bakes biscuits.")
 
-        User.objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
-        User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
+        get_user_model().objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
+        get_user_model().objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
 
         cls.expectations = dict(
             all_contacts=dedent("""
@@ -365,8 +365,8 @@ class NewsletterTests(Base):
                 documentUrl="https://github.com/sebastiaanschool",
                 publishedAt=cls.next_month)
 
-        User.objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
-        User.objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
+        get_user_model().objects.create_user('mere-mortal', 'myemail@example.com', 'I have no power')
+        get_user_model().objects.create_superuser('admin', 'myemail@example.com', 'I have the power')
 
         cls.expectations = dict(
             all_newsletters=dedent("""
@@ -467,170 +467,316 @@ class NewsletterTests(Base):
         self.assertEqual(Newsletter.objects.count(), 3)
 
 
-class UserTests(Base):
+class UserTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        User.objects.create_user('one', None, 'password1')
-        User.objects.create_user('two', None, 'password2')
-
-    def test_can_create_user_anonymously(self):
-        """
-        Ensures that we can create a user anonymously, we get (201 created).
-        """
-        # TODO issue a HTTP POST to some endpoint
-        self.assertFalse(True) # TODO
+        get_user_model().objects.create_user('one', None, 'password1')
+        get_user_model().objects.create_user('two', None, 'password2')
 
     def test_anonymous_user_cannot_GET_users(self):
         """
-        Ensures that when we GET users?all anonymously, we get (401 unauthorized)
+        Ensures that when we GET users?all anonymously, we get (403 forbidden)
         """
-        self.assertFalse(True) # TODO
+        response = self.client.get('/api/users?all')
+        self.assertEqual(response.status_code, 403)
 
-    def test_normal_user_can_only_GET_self(self):
+    def test_normal_user_cannot_GET_users(self):
         """
-        Ensures that when we GET users/?all while logged in, we get (200 ok + our own data ONLY).
+        Ensures that when we GET users?all anonymously, we get (403 forbidden)
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.get('/api/users?all')
+        self.assertEqual(response.status_code, 403)
 
     def test_normal_user_can_GET_self(self):
         """
         Ensures that when we GET users/one while logged in, we get (200 ok + our data).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.get('/api/users/one')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, '{}') # TODO expectation
+
+    def test_normal_user_cannot_GET_other(self):
+        """
+        Ensures that when we GET users/two while logged in, we get (200 ok + our data).
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.get('/api/users/two')
+        self.assertEqual(response.status_code, 403)
 
     def test_normal_user_cannot_PUT_self(self):
         """
         Ensures that when we PUT users/one while logged in, we get (405 method not allowed)
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.put('/api/users/one', {'email':'none@example.com'})
+        self.assertEqual(response.status_code, 405)
+
+    def test_normal_user_cannot_PUT_other(self):
+        """
+        Ensures that when we PUT users/two while logged in, we get (405 method not allowed)
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.put('/api/users/two', {'email':'none@example.com'})
+        self.assertEqual(response.status_code, 405)
 
     def test_normal_user_cannot_POST_self(self):
         """
-        Ensures that when we PUT users/one while logged in, we get (405 method not allowed)
+        Ensures that when we POST users/one while logged in, we get (405 method not allowed)
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/users/one', {'email':'none@example.com'})
+        self.assertEqual(response.status_code, 405)
+
+    def test_normal_user_cannot_POST_other(self):
+        """
+        Ensures that when we POST users/one while logged in, we get (405 method not allowed)
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/users/two', {'email':'none@example.com'})
+        self.assertEqual(response.status_code, 405)
 
     def test_normal_user_can_DELETE_self(self):
         """
         Ensures that when we DELETE users/one while logged in, we get (204 no content) and the record is gone
         """
-        self.assertFalse(True) # TODO
-
-    def test_normal_user_cannot_GET_other(self):
-        """
-        Ensures that when we GET users/two while logged in, we get (403 forbidden)
-        """
-        self.assertFalse(True) # TODO
-
-    def test_normal_user_cannot_PUT_other(self):
-        """
-        Ensures that when we PUT users/two while logged in, we get (405 method not allowed)
-        """
-        self.assertFalse(True) # TODO
-
-    def test_normal_user_cannot_POST_other(self):
-        """
-        Ensures that when we PUT users/two while logged in, we get (405 method not allowed)
-        """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.delete('/api/users/one')
+        self.assertEqual(response.status_code, 204)
+        user = get_user_model().objects.get(username="one")
+        self.assertIsNone(user)
 
     def test_normal_user_cannot_DELETE_other(self):
         """
-        Ensures that when we DELETE users/two while logged in, we get (403 forbidden)
+        Ensures that when we DELETE users/two while logged in, we get (405 method not allowed)
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.delete('/api/users/two')
+        self.assertEqual(response.status_code, 405)
 
 
-class UserDeviceTests(Base):
+class UserDeviceTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        User.objects.create_user('one', None, 'password1')
+        user1 = get_user_model().objects.create_user('one', None, 'password1')
+        user2 = get_user_model().objects.create_user('two', None, 'password2')
+        UserDevice.objects.create(user=user1,
+                                  wants_push_notifications=True,
+                                  firebase_instance_id='iid1')
+        UserDevice.objects.create(user=user2,
+                                  wants_push_notifications=False)
+
+    def test_can_enroll_anonymously_with_push_token(self):
+        """
+        Ensures that we can enroll (create a user anonymously), we get (201 created).
+        """
+        response = self.client.post('/api/user-devices?enroll',
+                                    {'username':'11111111-4321-1234-abcd-4321abcd1234',
+                                     'password':'aaaaaaaa-4321-abcd-1234-4321abcd1234',
+                                     'wants_push_notifications': True,
+                                     'firebase_instance_id': 'iid-test'})
+        self.assertEqual(response.status_code, 201)
+        user = get_user_model().objects.get(username="11111111-4321-1234-abcd-4321abcd1234")
+        self.assertIsNotNone(user)
+        push_prefs = UserDevice.objects.get(user=user)
+        self.assertIsNotNone(push_prefs)
+        self.assertTrue(push_prefs.wants_push_notifications)
+        self.assertEqual(push_prefs.firebase_instance_id, "iid-test")
+        self.assertTrue(self.client.login(
+            username='11111111-4321-1234-abcd-4321abcd1234',
+            password='aaaaaaaa-4321-abcd-1234-4321abcd1234'))
+
+    def test_can_enroll_anonymously_without_push_token(self):
+        """
+        Ensures that we can enroll (create a user anonymously), we get (201 created).
+        """
+        response = self.client.post('/api/user-devices?enroll',
+                                    {'username':'22222222-4321-1234-abcd-4321abcd1234',
+                                     'password':'bbbbbbbb-4321-abcd-1234-4321abcd1234'})
+        self.assertEqual(response.status_code, 201)
+        user = get_user_model().objects.get(username="22222222-4321-1234-abcd-4321abcd1234")
+        self.assertIsNotNone(user)
+        push_prefs = UserDevice.objects.get(user=user)
+        self.assertIsNotNone(push_prefs)
+        self.assertFalse(push_prefs.wants_push_notifications)
+        self.assertIsNone(push_prefs.firebase_instance_id)
+        self.assertTrue(self.client.login(
+            username='22222222-4321-1234-abcd-4321abcd1234',
+            password='bbbbbbbb-4321-abcd-1234-4321abcd1234'))
+
+    def test_cannot_enroll_when_already_logged_in(self):
+        """
+        Ensures that we cannot enroll when we are already logged in (400 bad request).
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/user-devices?enroll',
+                                    {'username':'11111111-4321-1234-abcd-4321abcd1234',
+                                     'password':'aaaaaaaa-4321-abcd-1234-4321abcd1234',
+                                     'wants_push_notifications': True,
+                                     'firebase_instance_id': 'iid-test'})
+        self.assertEqual(response.status_code, 400)
 
     def test_cannot_GET_all_user_devices_anonymously(self):
         """
         Ensures that when we GET user-devices/?all anonymously, we get (401 unauthorized).
         """
-        self.assertFalse(True) # TODO
+        response = self.client.get('/api/user-devices?all')
+        self.assertEqual(response.status_code, 401)
 
     def test_cannot_GET_user_device_anonymously(self):
         """
         Ensures that when we GET user-devices?mine anonymously, we get (401 unauthorized).
         """
-        self.assertFalse(True) # TODO
+        response = self.client.get('/api/user-devices?mine')
+        self.assertEqual(response.status_code, 401)
 
     def test_cannot_PUT_user_device_anonymously(self):
         """
         Ensures that when we PUT user-devices?mine anonymously, we get (401 unauthorized).
         """
-        self.assertFalse(True) # TODO
+        response = self.client.put('/api/user-devices?mine',
+                                   {'wants_push_notifications': True,
+                                    'firebase_instance_id': 'iid-test'})
+        self.assertEqual(response.status_code, 401)
 
     def test_cannot_POST_user_device_anonymously(self):
         """
         Ensures that when we DELETE user-devices?mine anonymously, we get (401 unauthorized).
         """
-        self.assertFalse(True) # TODO
+        response = self.client.post('/api/user-devices?mine',
+                                   {'wants_push_notifications': True,
+                                    'firebase_instance_id': 'iid-test'})
+        self.assertEqual(response.status_code, 401)
 
     def test_cannot_DELETE_user_device_anonymously(self):
         """
         Ensures that when we DELETE user-devices?mine anonymously, we get (401 unauthorized).
         """
-        self.assertFalse(True) # TODO
+        response = self.client.delete('/api/user-devices?mine')
+        self.assertEqual(response.status_code, 401)
 
-    def test_normal_user_can_only_GET_self(self):
+    def test_normal_user_cannot_GET_all(self):
         """
-        Ensures that when we GET user-devices?all while logged in, we get (200 ok + our own data ONLY).
+        Ensures that when we GET user-devices?all while logged in, we get (403 forbidden).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.get('/api/user-devices?all')
+        self.assertEqual(response.status_code, 403)
 
-    def test_normal_user_can_GET_self(self):
+    # TODO instead of this by_magic_uri business, we may want to just expose an RPC endpoint to update push prefs.
+
+    def test_normal_user_can_GET_self_by_magic_uri(self):
         """
         Ensures that when we GET user-devices?mine while logged in, we get (200 ok + our data).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.get('/api/user-devices?mine')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, '[{}]')  # TODO fill out expectation
 
-    def test_normal_user_cannot_PUT_self(self):
+    def test_normal_user_cannot_PUT_self_by_magic_uri(self):
         """
         Ensures that when we PUT user-devices?mine while logged in, we get (405 method not allowed).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.put('/api/user-devices?mine', {'wants_push_notifications': False})
+        self.assertEqual(response.status_code, 405)
 
-    def test_normal_user_cannot_POST_self(self):
+    def test_normal_user_can_POST_self_by_magic_uri(self):
         """
         Ensures that when we POST user-devices?mine while logged in, we get (200 ok + updated data).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/user-devices?mine', {'wants_push_notifications': False})
+        self.assertEqual(response.status_code, 204)
+        user = get_user_model().objects.get(username="one")
+        user_device = UserDevice.objects.get(user=user)
+        self.assertTrue(user_device.wants_push_notifications)
 
-    def test_normal_user_can_DELETE_self(self):
+    def test_normal_user_can_DELETE_self_by_magic_uri(self):
         """
         Ensures that when we DELETE user-devices?mine while logged in, we get (204 no content) and the record is gone
         """
-        self.assertFalse(True) # TODO
+        response = self.client.delete('/api/user-devices?mine', {'wants_push_notifications': False})
+        self.assertEqual(response.status_code, 201)
+        user = get_user_model().objects.get(username="one")
+        user_device = UserDevice.objects.get(user=user)
+        self.assertIsNone(user_device)
+
+    def test_normal_user_cannot_GET_self_by_direct_reference(self):
+        """
+        Ensures that when we GET user-devices/one while logged in, we get (403 forbidden).
+
+        We're violating REST principles here, but I don't want the client to know about or use the direct reference.
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.get('/api/user-devices/one')
+        self.assertEqual(response.status_code, 403)
+
+    def test_normal_user_cannot_PUT_self_by_direct_reference(self):
+        """
+        Ensures that when we PUT user-devices/one while logged in, we get (403 forbidden).
+
+        We're violating REST principles here, but I don't want the client to know about or use the direct reference.
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.put('/api/user-devices/one', {'wants_push_notifications': False})
+        self.assertEqual(response.status_code, 403)
+
+    def test_normal_user_cannot_POST_self_by_direct_reference(self):
+        """
+        Ensures that when we POST user-devices/one while logged in, we get (200 ok + updated data).
+
+        We're violating REST principles here, but I don't want the client to know about or use the direct reference.
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/user-devices/one', {'wants_push_notifications': False})
+        self.assertEqual(response.status_code, 403)
+
+    def test_normal_user_cannot_DELETE_self_by_direct_reference(self):
+        """
+        Ensures that when we DELETE user-devices/one while logged in, we get (204 no content) and the record is gone
+
+        We're violating REST principles here, but I don't want the client to know about or use the direct reference.
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.delete('/api/user-devices/one')
+        self.assertEqual(response.status_code, 403)
 
     def test_normal_user_cannot_GET_other(self):
         """
         Ensures that when we GET user-devices/<record_id> while logged in, we get (400 bad request).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.get('/api/user-devices/two')
+        self.assertEqual(response.status_code, 403)
 
     def test_normal_user_cannot_PUT_other(self):
         """
         Ensures that when we PUT user-devices/<record_id> while logged in, we get (400 bad request).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.put('/api/user-devices/two', {'wants_push_notifications': False})
+        self.assertEqual(response.status_code, 403)
 
     def test_normal_user_cannot_POST_other(self):
         """
         Ensures that when we POST user-devices/<record_id> while logged in, we get (400 bad request).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/user-devices/two', {'wants_push_notifications': False})
+        self.assertEqual(response.status_code, 403)
 
     def test_normal_user_cannot_DELETE_other(self):
         """
         Ensures that when we DELETE user-devices/<record_id> while logged in, we get (400 bad request).
         """
-        self.assertFalse(True) # TODO
+        self.client.login(username='one', password='password1')
+        response = self.client.delete('/api/user-devices/two')
+        self.assertEqual(response.status_code, 403)
 
 
 # Make us get stack traces instead of just warnings for "naive datetime".

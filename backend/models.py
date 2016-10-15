@@ -1,9 +1,8 @@
 from __future__ import unicode_literals
 from django.utils.encoding import python_2_unicode_compatible
 
+from django.conf import settings
 from django.db import models
-from django.contrib import admin
-from django.contrib.auth import get_user_model
 
 
 class Publication(models.Model):
@@ -92,20 +91,19 @@ class UserDevice(models.Model):
     - POST   /user-devices?mine        --> 200 OK + Updated Data
     - DELETE /user-devices?mine        --> 204 No Content
     - PUT    /user-devices?mine        --> 405 Method Not Allowed
-    - *      /user-devices/<record-id> --> 400 Bad Request
-    - GET    /user-devices?all         --> 200 OK + Our Data
+    - *      /user-devices/<record-id> --> 403 Forbidden
     - *      /user-devices?all         --> 403 Forbidden
     """
     user = models.OneToOneField(
-        get_user_model(),
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         primary_key=True,
     )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
     wants_push_notifications = models.BooleanField(default=False)
     firebase_instance_id = models.CharField(max_length=256, null=True)
 
     # No need for Manufacturer, Model, etc. We track those via normal analytics, if at all.
-
-
-class UserDeviceAdmin(admin.ModelAdmin):
-    pass
+    class Meta:
+        ordering = ('-updated',)

@@ -52,8 +52,10 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = get_user_model().objects.create(
             username=validated_data['username'],
+            # TODO instead of setting a bogus first_name, create & use a UserGroup
             first_name='Self-enrolled via API'
         )
+
 
         user.set_password(validated_data['password'])
         user.save()

@@ -1,11 +1,11 @@
 from datetime import timedelta
 from textwrap import dedent
+from warnings import filterwarnings
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from pytz import utc
 from rest_framework.test import APITestCase
-from warnings import filterwarnings
 
 from models import AgendaItem, Bulletin, ContactItem, Newsletter, UserDevice
 
@@ -471,50 +471,141 @@ class UserDeviceTests(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        user1 = get_user_model().objects.create_user('one', None, 'password1')
-        user2 = get_user_model().objects.create_user('two', None, 'password2')
+        user1 = get_user_model().objects.create_user('test-user-numero-uno', None, 'password1')
+        user2 = get_user_model().objects.create_user('test-user-numero-due', None, 'password2')
         UserDevice.objects.create(user=user1,
                                   wants_push_notifications=True,
                                   firebase_instance_id='iid1')
         UserDevice.objects.create(user=user2,
                                   wants_push_notifications=False)
 
-    def test_user_device_can_enroll_anonymously(self):
+    def test_user_device_enrollment_anonymously(self):
         """
-        Ensures that we can enroll (create a user anonymously), we get (201 created).
+        Ensures that we can enroll (create a user anonymously), we get (204 no content).
         """
         response = self.client.post('/api/enrollment',
                                     {'username':'22222222-4321-1234-abcd-4321abcd1234',
                                      'password':'bbbbbbbb-4321-abcd-1234-4321abcd1234'})
         self.assertEqual(response.status_code, 204)
+        # New user exists in database
         user = get_user_model().objects.get(username="22222222-4321-1234-abcd-4321abcd1234")
         self.assertIsNotNone(user)
+        self.assertIsNotNone(user.groups.get(name="self-enrolled"))
+        # New user has default push preferences
         push_prefs = UserDevice.objects.get(user=user)
         self.assertIsNotNone(push_prefs)
         self.assertFalse(push_prefs.wants_push_notifications)
         self.assertIsNone(push_prefs.firebase_instance_id)
+        # New user can be used to login
         self.assertTrue(self.client.login(
             username='22222222-4321-1234-abcd-4321abcd1234',
             password='bbbbbbbb-4321-abcd-1234-4321abcd1234'))
 
-    def test_user_device_cannot_enroll_when_already_logged_in(self):
+    def test_user_device_enrollment_cannot_overwrite_existing_user(self):
+        """
+        Ensures that enrollment fails on primary key clashes (409 conflict).
+        """
+        response = self.client.post('/api/enrollment',
+                                    {'username':'test-user-numero-uno',
+                                     'password':'bbbbbbbb-4321-abcd-1234-4321abcd1234'})
+        self.assertEqual(response.status_code, 409)
+
+    def test_user_device_enrollment_bad_username(self):
+        """
+        Ensures that enrollment fails on invalid username (400 bad request).
+        """
+        response = self.client.post('/api/enrollment',
+                                    {'username':1234,
+                                     'password':'bbbbbbbb-4321-abcd-1234-4321abcd1234'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"username should be string"}')
+
+    def test_user_device_enrollment_under_minimum_username_length(self):
+        """
+        Ensures that enrollment fails on short username (400 bad request).
+        """
+        response = self.client.post('/api/enrollment',
+                                    {'username':'123456789012345',
+                                     'password':'bbbbbbbb-4321-abcd-1234-4321abcd1234'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"username should be >16 and <=150"}')
+
+    def test_user_device_enrollment_over_maximum_username_length(self):
+        """
+        Ensures that enrollment fails on long username (400 bad request).
+        """
+        long_username = "".join(['a' for x in range(151)])
+        response = self.client.post('/api/enrollment',
+                                    {'username':'%s' % (long_username,),
+                                     'password':'bbbbbbbb-4321-abcd-1234-4321abcd1234'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"username should be >16 and <=150"}')
+
+    def test_user_device_enrollment_bad_password(self):
+        """
+        Ensures that enrollment fails on invalid password (400 bad request).
+        """
+        response = self.client.post('/api/enrollment',
+                                    {'username':'12345678901234563',
+                                     'password':123456789012345})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"password should be string"}')
+
+    def test_user_device_enrollment_under_minimum_password_length(self):
+        """
+        Ensures that enrollment fails on short password (400 bad request).
+        """
+        response = self.client.post('/api/enrollment',
+                                    {'username':'12345678901234567',
+                                     'password':'123456789012345'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"password should be >16 and <=256"}')
+
+    def test_user_device_enrollment_over_maximum_password_length(self):
+        """
+        Ensures that enrollment fails on long password (400 bad request).
+        """
+        long_password = "".join(['a' for x in range(257)])
+        response = self.client.post('/api/enrollment',
+                                    {'username':'01234567890123456',
+                                     'password':'%s' % (long_password,)})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"password should be >16 and <=256"}')
+
+    def test_user_device_enrollment_cannot_enroll_when_already_logged_in(self):
         """
         Ensures that we cannot enroll when we are already logged in (400 bad request).
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.post('/api/enrollment',
                                     {'username':'11111111-4321-1234-abcd-4321abcd1234',
                                      'password':'aaaaaaaa-4321-abcd-1234-4321abcd1234'})
         self.assertEqual(response.status_code, 400)
 
-    def test_user_device_cannot_GET_user_device_anonymously(self):
+    def test_user_device_enrollment_cannot_delete_self_anonymously(self):
+        """
+        Ensures we cannot delete ourselves when we're anonymous
+        """
+        response = self.client.delete('/api/enrollment')
+        self.assertEqual(response.status_code, 401)
+
+    def test_user_device_enrollment_can_delete_self(self):
+        """
+        Ensures we can delete ourselves
+        """
+        self.client.login(username='test-user-numero-due', password='password2')
+        response = self.client.delete('/api/enrollment')
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(get_user_model().objects.filter(username="test-user-numero-due").exists())
+
+    def test_user_device_push_settings_cannot_GET_user_device_anonymously(self):
         """
         Ensures that when we GET /api/push-settings anonymously, we get (401 unauthorized).
         """
         response = self.client.get('/api/push-settings')
         self.assertEqual(response.status_code, 403)
 
-    def test_user_device_cannot_PUT_user_device_anonymously(self):
+    def test_user_device_push_settings_cannot_PUT_user_device_anonymously(self):
         """
         Ensures that when we PUT /api/push-settings anonymously, we get (401 unauthorized).
         """
@@ -523,7 +614,7 @@ class UserDeviceTests(APITestCase):
                                     'firebase_iid': 'iid-test'})
         self.assertEqual(response.status_code, 403)
 
-    def test_user_device_cannot_POST_user_device_anonymously(self):
+    def test_user_device_push_settings_cannot_POST_user_device_anonymously(self):
         """
         Ensures that when we DELETE /api/push-settings anonymously, we get (401 unauthorized).
         """
@@ -532,121 +623,130 @@ class UserDeviceTests(APITestCase):
                                     'firebase_iid': 'iid-test'})
         self.assertEqual(response.status_code, 403)
 
-    def test_user_device_cannot_DELETE_user_device_anonymously(self):
+    def test_user_device_push_settings_cannot_DELETE_user_device_anonymously(self):
         """
         Ensures that when we DELETE /api/push-settings anonymously, we get (401 unauthorized).
         """
         response = self.client.delete('/api/push-settings')
         self.assertEqual(response.status_code, 403)
 
-    def test_user_device_normal_user_can_GET_self(self):
+    def test_user_device_push_settings_can_GET_self(self):
         """
         Ensures that when we GET /api/push-settings while logged in, we get (200 ok + our data).
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.get('/api/push-settings')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '{"notify_me":true}')
 
-    def test_user_device_normal_user_cannot_PUT_self(self):
+    def test_user_device_push_settings_cannot_PUT_self(self):
         """
         Ensures that when we PUT /api/push-settings while logged in, we get (405 method not allowed).
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.put('/api/push-settings', {'notify_me': False})
         self.assertEqual(response.status_code, 405)
 
-    def test_user_device_normal_user_cannot_DELETE_self(self):
+    def test_user_device_push_settings_cannot_DELETE_self(self):
         """
         Ensures that when we PUT /api/push-settings while logged in, we get (405 method not allowed).
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.delete('/api/push-settings')
         self.assertEqual(response.status_code, 405)
 
-    def test_user_device_normal_user_can_POST_self_to_clear_data(self):
+    def test_user_device_push_settings_can_POST_self_to_clear_data(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we get (200 and content).
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.post('/api/push-settings', data='{"notify_me": false}', content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '{"notify_me":false}')
-        user = get_user_model().objects.get(username="one")
+        user = get_user_model().objects.get(username="test-user-numero-uno")
         user_device = UserDevice.objects.get(user=user)
         self.assertFalse(user_device.wants_push_notifications)
         self.assertIsNone(user_device.firebase_instance_id)
 
-    def test_user_device_normal_user_can_POST_self_to_clear_data_ignoring_iid(self):
+    def test_user_device_push_settings_can_POST_self_to_clear_data_ignoring_iid(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we get (200 and content).
         Ensures that a firebase_iid included in the request is cleared
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.post('/api/push-settings', data='{"notify_me": false, "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
         self.assertEqual(response.status_code, 200)
-        user = get_user_model().objects.get(username="one")
+        user = get_user_model().objects.get(username="test-user-numero-uno")
         user_device = UserDevice.objects.get(user=user)
         self.assertIsNone(user_device.firebase_instance_id)
 
-    def test_user_device_normal_user_can_POST_self_to_set_data(self):
+    def test_user_device_push_settings_can_POST_self_to_set_data(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we get (204 no content).
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, '{"notify_me":true}')
-        user = get_user_model().objects.get(username="one")
+        user = get_user_model().objects.get(username="test-user-numero-uno")
         user_device = UserDevice.objects.get(user=user)
         self.assertTrue(user_device.wants_push_notifications)
         self.assertEqual(user_device.firebase_instance_id, '1234-5678-abcdefgh')
 
-    def test_user_device_POST_bad_input_1(self):
+    def test_user_device_push_settings_cannot_POST_bad_input_1(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.post('/api/push-settings', '{"notify_me": "always", "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"reason":"notify_me should be true or false"}')
+        self.assertEqual(response.content, '{"detail":"notify_me should be true or false"}')
 
-    def test_user_device_POST_bad_input_2(self):
+    def test_user_device_push_settings_cannot_POST_bad_input_2(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "1234"}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"reason":"firebase_iid should be >16 and <=256"}')
+        self.assertEqual(response.content, '{"detail":"firebase_iid should be >16 and <=256"}')
 
-    def test_user_device_POST_bad_input_3(self):
+    def test_user_device_push_settings_cannot_POST_bad_input_3(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         long_key = "".join(['a' for x in range(257)])
         response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "%s"}' % (long_key,), content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"reason":"firebase_iid should be >16 and <=256"}')
+        self.assertEqual(response.content, '{"detail":"firebase_iid should be >16 and <=256"}')
 
-    def test_user_device_POST_bad_input_4(self):
+    def test_user_device_push_settings_cannot_POST_bad_input_4(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": null}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"reason":"firebase_iid should be >16 and <=256"}')
+        self.assertEqual(response.content, '{"detail":"firebase_iid should be string"}')
 
-    def test_user_device_POST_bad_input_5(self):
+    def test_user_device_push_settings_cannot_POST_bad_input_5(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
-        self.client.login(username='one', password='password1')
+        self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.post('/api/push-settings', '{"notify_me": true}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"reason":"firebase_iid is required if notify_me is true"}')
+        self.assertEqual(response.content, '{"detail":"firebase_iid is required if notify_me is true"}')
+
+    def test_user_device_push_settings_cannot_POST_bad_input_6(self):
+        """
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
+        """
+        self.client.login(username='test-user-numero-uno', password='password1')
+        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": 42}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"firebase_iid should be string"}')
 
 
 # Make us get stack traces instead of just warnings for "naive datetime".

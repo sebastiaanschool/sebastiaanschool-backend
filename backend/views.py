@@ -1,9 +1,13 @@
+from datetime import datetime
+
+from django.contrib.auth import logout, get_user_model
+from django.contrib.auth.models import Group
 from django.utils import timezone
-from rest_framework.parsers import JSONParser
-from rest_framework import views, viewsets
-from rest_framework.response import Response
-from rest_framework.decorators import permission_classes
 from rest_framework import permissions
+from rest_framework import views, viewsets
+from rest_framework.decorators import permission_classes
+from rest_framework.parsers import JSONParser
+from rest_framework.response import Response
 
 from backend.models import AgendaItem, Bulletin, ContactItem, Newsletter, TimelineItem, UserDevice
 from backend.serializers import AgendaItemSerializer, BulletinSerializer, ContactItemSerializer, NewsletterSerializer, TimelineSerializer
@@ -107,24 +111,57 @@ class UserEnrollmentRPC(views.APIView):
     def post(self, request):
         if request.user.is_authenticated:
             return Response(data=None, status=400)
-        # TODO Get desired username from request
-        # TODO enforce minimum length -> status=400
-        # TODO Check if username exists -> status=409
-        # TODO Create User object
-        # TODO Create UserDevice object
+
+        username = request.data['username']
+        if type(username) is not unicode:
+            return self.bad_request('username should be string')
+        if not 16 < len(username) <= 150:
+            return self.bad_request('username should be >16 and <=150')
+
+        password = request.data['password']
+        if type(password) is not unicode:
+            return self.bad_request('password should be string')
+        if not 16 < len(password) <= 256:
+            return self.bad_request('password should be >16 and <=256')
+
+        if get_user_model().objects.filter(username=username).exists():
+            return Response(data=None, status=409)
+
+        group, created = Group.objects.get_or_create(name="self-enrolled")
+        if created:
+            group.save()
+        user = get_user_model().objects.create(
+            username=username,
+            # Shield your eyes, the next two lines are ugly.
+            first_name='Self-enrolled via API',
+            last_name=datetime.utcnow().isoformat()
+        )
+        user.set_password(password)
+        user.groups.add(group)
+        user.save()
+        UserDevice.objects.create(user=user)
         return Response(data=None, status=204)
 
-    def get(self, request):
+    @staticmethod
+    def get(request):
         return Response(data=None, status=405)
 
-    def put(self, request):
+    @staticmethod
+    def put(request):
         return Response(data=None, status=405)
 
-    def delete(self, request):
+    @staticmethod
+    def delete(request):
         if not request.user.is_authenticated:
             return Response(data=None, status=401)
-        # TODO logout user and delete user account
+        user = request.user
+        logout(request)
+        user.delete()
         return Response(data=None, status=204)
+
+    @staticmethod
+    def bad_request(reason):
+        return Response(data={'detail': reason}, status=400)
 
 
 @permission_classes((permissions.IsAuthenticated,))
@@ -151,7 +188,9 @@ class UserPushSettingsRPC(views.APIView):
 
         firebase_iid = None
         if self.JSON_FIREBASE_IID in request.data:
-            firebase_iid = str(request.data[self.JSON_FIREBASE_IID])
+            firebase_iid = request.data[self.JSON_FIREBASE_IID]
+            if type(firebase_iid) is not unicode:
+                return self.bad_request('firebase_iid should be string')
             if not 16 < len(firebase_iid) <= 256:
                 return self.bad_request('firebase_iid should be >16 and <=256')
 
@@ -192,4 +231,4 @@ class UserPushSettingsRPC(views.APIView):
 
     @staticmethod
     def bad_request(reason):
-        return Response(data={'reason': reason}, status=400)
+        return Response(data={'detail': reason}, status=400)

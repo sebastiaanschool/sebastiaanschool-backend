@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from django.utils.encoding import python_2_unicode_compatible
-
 from django.conf import settings
+from django.contrib import admin
 from django.db import models
 
 
@@ -80,19 +80,6 @@ class UserDevice(models.Model):
 
     Note: username/password pairs are random strings, apps enroll into django behind the scenes. Therefore there is no
     point in having a OneToMany from User to UserDevice; every device is a new user (also every app reset).
-
-    HTTP Access Patterns
-    ====================
-    these records are tied to a user account and inaccessible to any other user. There should be no constructable
-    location URI; direct reference is undesirable because it forces the client to have knowledge of the record ID. It
-    doesn't need to know. Therefore:
-
-    - GET    /user-devices?mine        --> 200 OK + Data
-    - POST   /user-devices?mine        --> 200 OK + Updated Data
-    - DELETE /user-devices?mine        --> 204 No Content
-    - PUT    /user-devices?mine        --> 405 Method Not Allowed
-    - *      /user-devices/<record-id> --> 403 Forbidden
-    - *      /user-devices?all         --> 403 Forbidden
     """
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -107,3 +94,13 @@ class UserDevice(models.Model):
     # No need for Manufacturer, Model, etc. We track those via normal analytics, if at all.
     class Meta:
         ordering = ('-updated',)
+
+
+class UserDeviceAdmin(admin.ModelAdmin):
+    """
+    Customizes the admin screen for UserDevice.
+
+    By convention this should live in admin.py, but I prefer having it close to the model object.
+    """
+    list_display = ('user', 'wants_push_notifications', 'firebase_instance_id', 'created', 'updated')
+    readonly_fields = ('firebase_instance_id',)

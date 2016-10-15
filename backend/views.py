@@ -101,8 +101,12 @@ class UserEnrollmentRPC(views.APIView):
     RPC endpoint for user enrollment.
 
     Allowed URL patterns:
-    - POST     /api/enrollment   {username: string, password: string}
+    - POST     /api/enrollment   Request body: {"username": string, "password": string}
     - DELETE   /api/enrollment
+
+    HTTPie test commands:
+    $ http --json POST http://localhost:8000/api/enrollment username=zeventien-letters password=zeventien-letters
+    $ http --auth zeventien-letters:zeventien-letters DELETE http://localhost:8000/api/enrollment
     """
 
     throttle_scope = 'enrollment'
@@ -171,7 +175,14 @@ class UserPushSettingsRPC(views.APIView):
 
     Allowed URL patterns:
     - GET     /api/push-settings
-    - POST    /api/push-settings    {notify_me: boolean, firebase_idd: string}
+    - POST    /api/push-settings   Request body: {"notify_me": boolean, "firebase_iid": string}
+
+    HTTPie test commands:
+    $ http --auth zeventien-letters:zeventien-letters GET http://localhost:8000/api/push-settings
+    $ http --json --auth zeventien-letters:zeventien-letters POST http://localhost:8000/api/push-settings \
+           notify_me:=true firebase_iid=zeventien-letters
+    $ http --json --auth zeventien-letters:zeventien-letters POST http://localhost:8000/api/push-settings \
+           notify_me:=false
     """
     JSON_NOTIFY_ME = 'notify_me'
     JSON_FIREBASE_IID = 'firebase_iid'

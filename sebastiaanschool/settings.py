@@ -42,7 +42,15 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
     # The test client sends JSON instead of `x-www-form-urlencoded` payloads by default.
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+
+    # Use throttling to avoid user enumeration through the enrollment API
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'enrollment': '20/hour'
+    }
 }
 
 # Application definition

@@ -28,6 +28,8 @@ router.register(r'timeline', views.TimelineViewSet)
 
 urlpatterns = [
     url(r'^$', lambda r: HttpResponseRedirect('/api/')),
+    url(r'^api/enrollment$', views.UserEnrollmentRPC.as_view()),
+    url(r'^api/push-settings$', views.UserPushSettingsRPC.as_view()),
     url(r'^api/', include(router.urls)),
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))

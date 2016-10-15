@@ -67,7 +67,7 @@ class AgendaItemTests(Base):
                    cls.today_str, cls.next_month_str)
         )
 
-    def test_get_agenda_items_returns_ascending_order_starting_today(self):
+    def test_agenda_get_agenda_items_returns_ascending_order_starting_today(self):
         """
         Ensures that when we GET agendaItems, they're in ascending order by date, and past agendaItems are not included.
         """
@@ -75,7 +75,7 @@ class AgendaItemTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['coming_agenda_items'])
 
-    def test_get_all_agenda_items_returns_ascending_order(self):
+    def test_agenda_get_all_agenda_items_returns_ascending_order(self):
         """
         Ensures that when we GET agendaItems?all, they're in ascending order by date, and past agendaItems are included.
         """
@@ -83,14 +83,14 @@ class AgendaItemTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['all_agenda_items'])
 
-    def test_post_agenda_item_unauthenticated_is_not_allowed(self):
+    def test_agenda_post_agenda_item_unauthenticated_is_not_allowed(self):
         response = self.client.post('/api/agendaItems/', {'title': 'Access denied',
                                                           'type': 'Event',
                                                           'start': '2016-03-10T20:00:00Z',
                                                           'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_post_agenda_item_as_normal_user_is_not_allowed(self):
+    def test_agenda_post_agenda_item_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
         response = self.client.post('/api/agendaItems/', {'title': 'Access denied',
                                                           'type': 'Event',
@@ -98,7 +98,7 @@ class AgendaItemTests(Base):
                                                           'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_post_agenda_item_as_admin_is_allowed(self):
+    def test_agenda_post_agenda_item_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
         response = self.client.post('/api/agendaItems/', {'title': 'Access granted',
                                                           'type': 'Event',
@@ -107,14 +107,14 @@ class AgendaItemTests(Base):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(AgendaItem.objects.count(), 4)
 
-    def test_put_agenda_item_unauthenticated_is_not_allowed(self):
+    def test_agenda_put_agenda_item_unauthenticated_is_not_allowed(self):
         response = self.client.put('/api/agendaItems/', {'title': 'Access denied',
                                                          'type': 'Event',
                                                          'start': '2016-03-10T20:00:00Z',
                                                          'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_put_agenda_item_as_normal_user_is_not_allowed(self):
+    def test_agenda_put_agenda_item_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
         response = self.client.put('/api/agendaItems/', {'title': 'Access denied',
                                                          'type': 'Event',
@@ -122,7 +122,7 @@ class AgendaItemTests(Base):
                                                          'end': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_put_agenda_item_as_admin_is_not_allowed(self):
+    def test_agenda_put_agenda_item_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
         response = self.client.put('/api/agendaItems/', {'title': 'Access denied',
                                                          'type': 'Event',
@@ -169,7 +169,7 @@ class BulletinTests(Base):
                 % (cls.today_str, cls.last_month_str)
         )
 
-    def test_get_bulletins_returns_descending_order_up_to_today(self):
+    def test_bulletin_get_bulletins_returns_descending_order_up_to_today(self):
         """
         Ensures that when we GET bulletins, they're in descending order by date, and future bulletins are not included.
         """
@@ -177,7 +177,7 @@ class BulletinTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['todays_bulletins'])
 
-    def test_get_all_bulletins_unauthenticated_returns_descending_order_up_to_today(self):
+    def test_bulletin_get_all_bulletins_unauthenticated_returns_descending_order_up_to_today(self):
         """
         Ensures that when we GET bulletins?all anonymously, they're in descending order by date, and future bulletins
         are not included.
@@ -186,7 +186,7 @@ class BulletinTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['todays_bulletins'])
 
-    def test_get_all_bulletins_as_normal_user_returns_descending_order_up_to_today(self):
+    def test_bulletin_get_all_bulletins_as_normal_user_returns_descending_order_up_to_today(self):
         """
         Ensures that when we GET bulletins?all anonymously, they're in descending order by date, and future bulletins
         are not included.
@@ -196,7 +196,7 @@ class BulletinTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['todays_bulletins'])
 
-    def test_get_all_bulletins_as_admin_returns_descending_order_including_future(self):
+    def test_bulletin_get_all_bulletins_as_admin_returns_descending_order_including_future(self):
         """
         Ensures that when we GET bulletins?all as admin, they're in descending order by date, and future bulletins are
         included.
@@ -206,20 +206,20 @@ class BulletinTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['all_bulletins'])
 
-    def test_post_bulletin_unauthenticated_is_not_allowed(self):
+    def test_bulletin_post_bulletin_unauthenticated_is_not_allowed(self):
         response = self.client.post('/api/bulletins/', {'title': 'Access denied',
                                                         'body': 'This is not acceptable',
                                                         'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_post_bulletin_as_normal_user_is_not_allowed(self):
+    def test_bulletin_post_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
         response = self.client.post('/api/bulletins/', {'title': 'Access denied',
                                                         'body': 'This is not acceptable',
                                                         'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_post_bulletin_as_admin_is_allowed(self):
+    def test_bulletin_post_bulletin_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
         response = self.client.post('/api/bulletins/', {'title': 'Access granted',
                                                         'body': 'This is allowed',
@@ -227,20 +227,20 @@ class BulletinTests(Base):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Bulletin.objects.count(), 4)
 
-    def test_put_bulletin_unauthenticated_is_not_allowed(self):
+    def test_bulletin_put_bulletin_unauthenticated_is_not_allowed(self):
         response = self.client.put('/api/bulletins/', {'title': 'Access denied',
                                                        'body': 'This is not acceptable',
                                                        'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_put_bulletin_as_normal_user_is_not_allowed(self):
+    def test_bulletin_put_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
         response = self.client.put('/api/bulletins/', {'title': 'Access denied',
                                                        'body': 'This is not acceptable',
                                                        'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_put_bulletin_as_admin_is_not_allowed(self):
+    def test_bulletin_put_bulletin_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
         response = self.client.put('/api/bulletins/', {'title': 'Access denied',
                                                        'body': 'This is not acceptable',
@@ -291,7 +291,7 @@ class ContactItemTests(Base):
                 "url":"http://testserver/api/contactItems/1/"}]""").replace('\n', ''),
         )
 
-    def test_get_contact_items_returns_contacts_in_field_order(self):
+    def test_contact_item_get_contact_items_returns_contacts_in_field_order(self):
         """
         Ensures that when we GET contactItems, they're in ascending order by `order`.
         """
@@ -299,14 +299,14 @@ class ContactItemTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['all_contacts'])
 
-    def test_post_contact_item_unauthenticated_is_not_allowed(self):
+    def test_contact_item_post_contact_item_unauthenticated_is_not_allowed(self):
         response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson',
                                                            'email': 'dd@example.com',
                                                            'order': 4,
                                                            'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 403)
 
-    def test_post_contact_item_as_normal_user_is_not_allowed(self):
+    def test_contact_item_post_contact_item_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
         response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson',
                                                            'email': 'dd@example.com',
@@ -314,7 +314,7 @@ class ContactItemTests(Base):
                                                            'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 403)
 
-    def test_post_contact_item_as_admin_is_allowed(self):
+    def test_contact_item_post_contact_item_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
         response = self.client.post('/api/contactItems/', {'displayName': 'David Davidson',
                                                            'email': 'dd@example.com',
@@ -323,14 +323,14 @@ class ContactItemTests(Base):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(ContactItem.objects.count(), 4)
 
-    def test_put_contact_item_unauthenticated_is_not_allowed(self):
+    def test_contact_item_put_contact_item_unauthenticated_is_not_allowed(self):
         response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson',
                                                           'email': 'dd@example.com',
                                                           'order': 4,
                                                           'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 403)
 
-    def test_put_contact_item_as_normal_user_is_not_allowed(self):
+    def test_contact_item_put_contact_item_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
         response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson',
                                                           'email': 'dd@example.com',
@@ -338,7 +338,7 @@ class ContactItemTests(Base):
                                                           'detailText': 'David doesn\'t dance daily.'})
         self.assertEqual(response.status_code, 403)
 
-    def test_put_contact_item_as_admin_is_not_allowed(self):
+    def test_contact_item_put_contact_item_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
         response = self.client.put('/api/contactItems/', {'displayName': 'David Davidson',
                                                           'email': 'dd@example.com',
@@ -387,7 +387,7 @@ class NewsletterTests(Base):
                 % (cls.today_str, cls.last_month_str)
         )
 
-    def test_get_newsletters_returns_descending_order_up_to_today(self):
+    def test_newsletter_get_newsletters_returns_descending_order_up_to_today(self):
         """
         Ensures that when we GET newsletters, they're in descending order by date, and future ones are not included.
         """
@@ -395,7 +395,7 @@ class NewsletterTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['todays_newsletters'])
 
-    def test_get_all_newsletters_unauthenticated_returns_descending_order_up_to_today(self):
+    def test_newsletter_get_all_newsletters_unauthenticated_returns_descending_order_up_to_today(self):
         """
         Ensures that when we GET newsletters?all anonymously, they're in descending order by date, and future ones
         are not included.
@@ -404,7 +404,7 @@ class NewsletterTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['todays_newsletters'])
 
-    def test_get_all_newsletters_as_normal_user_returns_descending_order_up_to_today(self):
+    def test_newsletter_get_all_newsletters_as_normal_user_returns_descending_order_up_to_today(self):
         """
         Ensures that when we GET newsletters?all anonymously, they're in descending order by date, and future ones
         are not included.
@@ -414,7 +414,7 @@ class NewsletterTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['todays_newsletters'])
 
-    def test_get_all_newsletters_as_admin_returns_descending_order_including_future(self):
+    def test_newsletter_get_all_newsletters_as_admin_returns_descending_order_including_future(self):
         """
         Ensures that when we GET newsletters?all as admin, they're in descending order by date, and future ones are
         included.
@@ -424,20 +424,20 @@ class NewsletterTests(Base):
         response.render()
         self.assertEqual(response.content, self.expectations['all_newsletters'])
 
-    def test_post_bulletin_unauthenticated_is_not_allowed(self):
+    def test_newsletter_post_bulletin_unauthenticated_is_not_allowed(self):
         response = self.client.post('/api/newsletters/', {'title': 'Access denied',
                                                           'documentUrl': 'This is not acceptable',
                                                           'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_post_bulletin_as_normal_user_is_not_allowed(self):
+    def test_newsletter_post_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
         response = self.client.post('/api/newsletters/', {'title': 'Access denied',
                                                           'documentUrl': 'This is not acceptable',
                                                           'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_post_bulletin_as_admin_is_allowed(self):
+    def test_newsletter_post_bulletin_as_admin_is_allowed(self):
         self.client.login(username='admin', password='I have the power')
         response = self.client.post('/api/newsletters/', {'title': 'Access granted',
                                                           'documentUrl': 'This is allowed',
@@ -445,116 +445,26 @@ class NewsletterTests(Base):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Newsletter.objects.count(), 4)
 
-    def test_put_bulletin_unauthenticated_is_not_allowed(self):
+    def test_newsletter_put_bulletin_unauthenticated_is_not_allowed(self):
         response = self.client.put('/api/newsletters/', {'title': 'Access denied',
                                                          'documentUrl': 'This is not acceptable',
                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_put_bulletin_as_normal_user_is_not_allowed(self):
+    def test_newsletter_put_bulletin_as_normal_user_is_not_allowed(self):
         self.client.login(username='mere-mortal', password='I have no power')
         response = self.client.put('/api/newsletters/', {'title': 'Access denied',
                                                          'documentUrl': 'This is not acceptable',
                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 403)
 
-    def test_put_bulletin_as_admin_is_not_allowed(self):
+    def test_newsletter_put_bulletin_as_admin_is_not_allowed(self):
         self.client.login(username='admin', password='I have the power')
         response = self.client.put('/api/newsletters/', {'title': 'Access denied',
                                                          'documentUrl': 'This is not acceptable',
                                                          'publishedAt': '2016-03-10T20:00:00Z'})
         self.assertEqual(response.status_code, 405)
         self.assertEqual(Newsletter.objects.count(), 3)
-
-
-class UserTests(APITestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        get_user_model().objects.create_user('one', None, 'password1')
-        get_user_model().objects.create_user('two', None, 'password2')
-
-    def test_anonymous_user_cannot_GET_users(self):
-        """
-        Ensures that when we GET users?all anonymously, we get (403 forbidden)
-        """
-        response = self.client.get('/api/users?all')
-        self.assertEqual(response.status_code, 403)
-
-    def test_normal_user_cannot_GET_users(self):
-        """
-        Ensures that when we GET users?all anonymously, we get (403 forbidden)
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.get('/api/users?all')
-        self.assertEqual(response.status_code, 403)
-
-    def test_normal_user_can_GET_self(self):
-        """
-        Ensures that when we GET users/one while logged in, we get (200 ok + our data).
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.get('/api/users/one')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, '{}') # TODO expectation
-
-    def test_normal_user_cannot_GET_other(self):
-        """
-        Ensures that when we GET users/two while logged in, we get (200 ok + our data).
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.get('/api/users/two')
-        self.assertEqual(response.status_code, 403)
-
-    def test_normal_user_cannot_PUT_self(self):
-        """
-        Ensures that when we PUT users/one while logged in, we get (405 method not allowed)
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.put('/api/users/one', {'email':'none@example.com'})
-        self.assertEqual(response.status_code, 405)
-
-    def test_normal_user_cannot_PUT_other(self):
-        """
-        Ensures that when we PUT users/two while logged in, we get (405 method not allowed)
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.put('/api/users/two', {'email':'none@example.com'})
-        self.assertEqual(response.status_code, 405)
-
-    def test_normal_user_cannot_POST_self(self):
-        """
-        Ensures that when we POST users/one while logged in, we get (405 method not allowed)
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.post('/api/users/one', {'email':'none@example.com'})
-        self.assertEqual(response.status_code, 405)
-
-    def test_normal_user_cannot_POST_other(self):
-        """
-        Ensures that when we POST users/one while logged in, we get (405 method not allowed)
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.post('/api/users/two', {'email':'none@example.com'})
-        self.assertEqual(response.status_code, 405)
-
-    def test_normal_user_can_DELETE_self(self):
-        """
-        Ensures that when we DELETE users/one while logged in, we get (204 no content) and the record is gone
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.delete('/api/users/one')
-        self.assertEqual(response.status_code, 204)
-        user = get_user_model().objects.get(username="one")
-        self.assertIsNone(user)
-
-    def test_normal_user_cannot_DELETE_other(self):
-        """
-        Ensures that when we DELETE users/two while logged in, we get (405 method not allowed)
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.delete('/api/users/two')
-        self.assertEqual(response.status_code, 405)
 
 
 class UserDeviceTests(APITestCase):
@@ -569,34 +479,14 @@ class UserDeviceTests(APITestCase):
         UserDevice.objects.create(user=user2,
                                   wants_push_notifications=False)
 
-    def test_can_enroll_anonymously_with_push_token(self):
+    def test_user_device_can_enroll_anonymously(self):
         """
         Ensures that we can enroll (create a user anonymously), we get (201 created).
         """
-        response = self.client.post('/api/user-devices?enroll',
-                                    {'username':'11111111-4321-1234-abcd-4321abcd1234',
-                                     'password':'aaaaaaaa-4321-abcd-1234-4321abcd1234',
-                                     'wants_push_notifications': True,
-                                     'firebase_instance_id': 'iid-test'})
-        self.assertEqual(response.status_code, 201)
-        user = get_user_model().objects.get(username="11111111-4321-1234-abcd-4321abcd1234")
-        self.assertIsNotNone(user)
-        push_prefs = UserDevice.objects.get(user=user)
-        self.assertIsNotNone(push_prefs)
-        self.assertTrue(push_prefs.wants_push_notifications)
-        self.assertEqual(push_prefs.firebase_instance_id, "iid-test")
-        self.assertTrue(self.client.login(
-            username='11111111-4321-1234-abcd-4321abcd1234',
-            password='aaaaaaaa-4321-abcd-1234-4321abcd1234'))
-
-    def test_can_enroll_anonymously_without_push_token(self):
-        """
-        Ensures that we can enroll (create a user anonymously), we get (201 created).
-        """
-        response = self.client.post('/api/user-devices?enroll',
+        response = self.client.post('/api/enrollment',
                                     {'username':'22222222-4321-1234-abcd-4321abcd1234',
                                      'password':'bbbbbbbb-4321-abcd-1234-4321abcd1234'})
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 204)
         user = get_user_model().objects.get(username="22222222-4321-1234-abcd-4321abcd1234")
         self.assertIsNotNone(user)
         push_prefs = UserDevice.objects.get(user=user)
@@ -607,176 +497,156 @@ class UserDeviceTests(APITestCase):
             username='22222222-4321-1234-abcd-4321abcd1234',
             password='bbbbbbbb-4321-abcd-1234-4321abcd1234'))
 
-    def test_cannot_enroll_when_already_logged_in(self):
+    def test_user_device_cannot_enroll_when_already_logged_in(self):
         """
         Ensures that we cannot enroll when we are already logged in (400 bad request).
         """
         self.client.login(username='one', password='password1')
-        response = self.client.post('/api/user-devices?enroll',
+        response = self.client.post('/api/enrollment',
                                     {'username':'11111111-4321-1234-abcd-4321abcd1234',
-                                     'password':'aaaaaaaa-4321-abcd-1234-4321abcd1234',
-                                     'wants_push_notifications': True,
-                                     'firebase_instance_id': 'iid-test'})
+                                     'password':'aaaaaaaa-4321-abcd-1234-4321abcd1234'})
         self.assertEqual(response.status_code, 400)
 
-    def test_cannot_GET_all_user_devices_anonymously(self):
+    def test_user_device_cannot_GET_user_device_anonymously(self):
         """
-        Ensures that when we GET user-devices/?all anonymously, we get (401 unauthorized).
+        Ensures that when we GET /api/push-settings anonymously, we get (401 unauthorized).
         """
-        response = self.client.get('/api/user-devices?all')
-        self.assertEqual(response.status_code, 401)
-
-    def test_cannot_GET_user_device_anonymously(self):
-        """
-        Ensures that when we GET user-devices?mine anonymously, we get (401 unauthorized).
-        """
-        response = self.client.get('/api/user-devices?mine')
-        self.assertEqual(response.status_code, 401)
-
-    def test_cannot_PUT_user_device_anonymously(self):
-        """
-        Ensures that when we PUT user-devices?mine anonymously, we get (401 unauthorized).
-        """
-        response = self.client.put('/api/user-devices?mine',
-                                   {'wants_push_notifications': True,
-                                    'firebase_instance_id': 'iid-test'})
-        self.assertEqual(response.status_code, 401)
-
-    def test_cannot_POST_user_device_anonymously(self):
-        """
-        Ensures that when we DELETE user-devices?mine anonymously, we get (401 unauthorized).
-        """
-        response = self.client.post('/api/user-devices?mine',
-                                   {'wants_push_notifications': True,
-                                    'firebase_instance_id': 'iid-test'})
-        self.assertEqual(response.status_code, 401)
-
-    def test_cannot_DELETE_user_device_anonymously(self):
-        """
-        Ensures that when we DELETE user-devices?mine anonymously, we get (401 unauthorized).
-        """
-        response = self.client.delete('/api/user-devices?mine')
-        self.assertEqual(response.status_code, 401)
-
-    def test_normal_user_cannot_GET_all(self):
-        """
-        Ensures that when we GET user-devices?all while logged in, we get (403 forbidden).
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.get('/api/user-devices?all')
+        response = self.client.get('/api/push-settings')
         self.assertEqual(response.status_code, 403)
 
-    # TODO instead of this by_magic_uri business, we may want to just expose an RPC endpoint to update push prefs.
-
-    def test_normal_user_can_GET_self_by_magic_uri(self):
+    def test_user_device_cannot_PUT_user_device_anonymously(self):
         """
-        Ensures that when we GET user-devices?mine while logged in, we get (200 ok + our data).
+        Ensures that when we PUT /api/push-settings anonymously, we get (401 unauthorized).
+        """
+        response = self.client.put('/api/push-settings',
+                                   {'notify_me': True,
+                                    'firebase_iid': 'iid-test'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_user_device_cannot_POST_user_device_anonymously(self):
+        """
+        Ensures that when we DELETE /api/push-settings anonymously, we get (401 unauthorized).
+        """
+        response = self.client.post('/api/push-settings',
+                                   {'notify_me': True,
+                                    'firebase_iid': 'iid-test'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_user_device_cannot_DELETE_user_device_anonymously(self):
+        """
+        Ensures that when we DELETE /api/push-settings anonymously, we get (401 unauthorized).
+        """
+        response = self.client.delete('/api/push-settings')
+        self.assertEqual(response.status_code, 403)
+
+    def test_user_device_normal_user_can_GET_self(self):
+        """
+        Ensures that when we GET /api/push-settings while logged in, we get (200 ok + our data).
         """
         self.client.login(username='one', password='password1')
-        response = self.client.get('/api/user-devices?mine')
+        response = self.client.get('/api/push-settings')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, '[{}]')  # TODO fill out expectation
+        self.assertEqual(response.content, '{"notify_me":true}')
 
-    def test_normal_user_cannot_PUT_self_by_magic_uri(self):
+    def test_user_device_normal_user_cannot_PUT_self(self):
         """
-        Ensures that when we PUT user-devices?mine while logged in, we get (405 method not allowed).
+        Ensures that when we PUT /api/push-settings while logged in, we get (405 method not allowed).
         """
         self.client.login(username='one', password='password1')
-        response = self.client.put('/api/user-devices?mine', {'wants_push_notifications': False})
+        response = self.client.put('/api/push-settings', {'notify_me': False})
         self.assertEqual(response.status_code, 405)
 
-    def test_normal_user_can_POST_self_by_magic_uri(self):
+    def test_user_device_normal_user_cannot_DELETE_self(self):
         """
-        Ensures that when we POST user-devices?mine while logged in, we get (200 ok + updated data).
+        Ensures that when we PUT /api/push-settings while logged in, we get (405 method not allowed).
         """
         self.client.login(username='one', password='password1')
-        response = self.client.post('/api/user-devices?mine', {'wants_push_notifications': False})
-        self.assertEqual(response.status_code, 204)
+        response = self.client.delete('/api/push-settings')
+        self.assertEqual(response.status_code, 405)
+
+    def test_user_device_normal_user_can_POST_self_to_clear_data(self):
+        """
+        Ensures that when we POST /api/push-settings while logged in, we get (200 and content).
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/push-settings', data='{"notify_me": false}', content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, '{"notify_me":false}')
+        user = get_user_model().objects.get(username="one")
+        user_device = UserDevice.objects.get(user=user)
+        self.assertFalse(user_device.wants_push_notifications)
+        self.assertIsNone(user_device.firebase_instance_id)
+
+    def test_user_device_normal_user_can_POST_self_to_clear_data_ignoring_iid(self):
+        """
+        Ensures that when we POST /api/push-settings while logged in, we get (200 and content).
+        Ensures that a firebase_iid included in the request is cleared
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/push-settings', data='{"notify_me": false, "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        user = get_user_model().objects.get(username="one")
+        user_device = UserDevice.objects.get(user=user)
+        self.assertIsNone(user_device.firebase_instance_id)
+
+    def test_user_device_normal_user_can_POST_self_to_set_data(self):
+        """
+        Ensures that when we POST /api/push-settings while logged in, we get (204 no content).
+        """
+        self.client.login(username='one', password='password1')
+        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, '{"notify_me":true}')
         user = get_user_model().objects.get(username="one")
         user_device = UserDevice.objects.get(user=user)
         self.assertTrue(user_device.wants_push_notifications)
+        self.assertEqual(user_device.firebase_instance_id, '1234-5678-abcdefgh')
 
-    def test_normal_user_can_DELETE_self_by_magic_uri(self):
+    def test_user_device_POST_bad_input_1(self):
         """
-        Ensures that when we DELETE user-devices?mine while logged in, we get (204 no content) and the record is gone
-        """
-        response = self.client.delete('/api/user-devices?mine', {'wants_push_notifications': False})
-        self.assertEqual(response.status_code, 201)
-        user = get_user_model().objects.get(username="one")
-        user_device = UserDevice.objects.get(user=user)
-        self.assertIsNone(user_device)
-
-    def test_normal_user_cannot_GET_self_by_direct_reference(self):
-        """
-        Ensures that when we GET user-devices/one while logged in, we get (403 forbidden).
-
-        We're violating REST principles here, but I don't want the client to know about or use the direct reference.
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='one', password='password1')
-        response = self.client.get('/api/user-devices/one')
-        self.assertEqual(response.status_code, 403)
+        response = self.client.post('/api/push-settings', '{"notify_me": "always", "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"reason":"notify_me should be true or false"}')
 
-    def test_normal_user_cannot_PUT_self_by_direct_reference(self):
+    def test_user_device_POST_bad_input_2(self):
         """
-        Ensures that when we PUT user-devices/one while logged in, we get (403 forbidden).
-
-        We're violating REST principles here, but I don't want the client to know about or use the direct reference.
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='one', password='password1')
-        response = self.client.put('/api/user-devices/one', {'wants_push_notifications': False})
-        self.assertEqual(response.status_code, 403)
+        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "1234"}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"reason":"firebase_iid should be >16 and <=256"}')
 
-    def test_normal_user_cannot_POST_self_by_direct_reference(self):
+    def test_user_device_POST_bad_input_3(self):
         """
-        Ensures that when we POST user-devices/one while logged in, we get (200 ok + updated data).
-
-        We're violating REST principles here, but I don't want the client to know about or use the direct reference.
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='one', password='password1')
-        response = self.client.post('/api/user-devices/one', {'wants_push_notifications': False})
-        self.assertEqual(response.status_code, 403)
+        long_key = "".join(['a' for x in range(257)])
+        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "%s"}' % (long_key,), content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"reason":"firebase_iid should be >16 and <=256"}')
 
-    def test_normal_user_cannot_DELETE_self_by_direct_reference(self):
+    def test_user_device_POST_bad_input_4(self):
         """
-        Ensures that when we DELETE user-devices/one while logged in, we get (204 no content) and the record is gone
-
-        We're violating REST principles here, but I don't want the client to know about or use the direct reference.
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='one', password='password1')
-        response = self.client.delete('/api/user-devices/one')
-        self.assertEqual(response.status_code, 403)
+        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": null}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"reason":"firebase_iid should be >16 and <=256"}')
 
-    def test_normal_user_cannot_GET_other(self):
+    def test_user_device_POST_bad_input_5(self):
         """
-        Ensures that when we GET user-devices/<record_id> while logged in, we get (400 bad request).
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='one', password='password1')
-        response = self.client.get('/api/user-devices/two')
-        self.assertEqual(response.status_code, 403)
-
-    def test_normal_user_cannot_PUT_other(self):
-        """
-        Ensures that when we PUT user-devices/<record_id> while logged in, we get (400 bad request).
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.put('/api/user-devices/two', {'wants_push_notifications': False})
-        self.assertEqual(response.status_code, 403)
-
-    def test_normal_user_cannot_POST_other(self):
-        """
-        Ensures that when we POST user-devices/<record_id> while logged in, we get (400 bad request).
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.post('/api/user-devices/two', {'wants_push_notifications': False})
-        self.assertEqual(response.status_code, 403)
-
-    def test_normal_user_cannot_DELETE_other(self):
-        """
-        Ensures that when we DELETE user-devices/<record_id> while logged in, we get (400 bad request).
-        """
-        self.client.login(username='one', password='password1')
-        response = self.client.delete('/api/user-devices/two')
-        self.assertEqual(response.status_code, 403)
+        response = self.client.post('/api/push-settings', '{"notify_me": true}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"reason":"firebase_iid is required if notify_me is true"}')
 
 
 # Make us get stack traces instead of just warnings for "naive datetime".

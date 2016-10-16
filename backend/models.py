@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
-from django.utils.encoding import python_2_unicode_compatible
-from django.conf import settings
-from django.contrib import admin
+
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 
 
 class Publication(models.Model):
@@ -72,35 +71,3 @@ class TimelineItem(Publication):
 
     class Meta:
         managed = False    # This model class has no table of its own.
-
-
-class UserDevice(models.Model):
-    """
-    Push notification settings for a user (more accurately: for a device).
-
-    Note: username/password pairs are random strings, apps enroll into django behind the scenes. Therefore there is no
-    point in having a OneToMany from User to UserDevice; every device is a new user (also every app reset).
-    """
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        primary_key=True,
-    )
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-    wants_push_notifications = models.BooleanField(default=False)
-    firebase_instance_id = models.CharField(max_length=256, null=True)
-
-    # No need for Manufacturer, Model, etc. We track those via normal analytics, if at all.
-    class Meta:
-        ordering = ('-updated',)
-
-
-class UserDeviceAdmin(admin.ModelAdmin):
-    """
-    Customizes the admin screen for UserDevice.
-
-    By convention this should live in admin.py, but I prefer having it close to the model object.
-    """
-    list_display = ('user', 'wants_push_notifications', 'firebase_instance_id', 'created', 'updated')
-    readonly_fields = ('firebase_instance_id',)

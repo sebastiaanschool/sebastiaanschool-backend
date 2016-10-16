@@ -4,10 +4,12 @@ from warnings import filterwarnings
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from push_notifications.models import APNSDevice, GCMDevice
 from pytz import utc
 from rest_framework.test import APITestCase
 
-from models import AgendaItem, Bulletin, ContactItem, Newsletter, UserDevice
+from models import AgendaItem, Bulletin, ContactItem, Newsletter
+from views import find_device_for_user
 
 
 # To run tests: execute `python manage.py test` on the command line.
@@ -473,11 +475,11 @@ class UserDeviceTests(APITestCase):
     def setUpTestData(cls):
         user1 = get_user_model().objects.create_user('test-user-numero-uno', None, 'password1')
         user2 = get_user_model().objects.create_user('test-user-numero-due', None, 'password2')
-        UserDevice.objects.create(user=user1,
-                                  wants_push_notifications=True,
-                                  firebase_instance_id='iid1')
-        UserDevice.objects.create(user=user2,
-                                  wants_push_notifications=False)
+        GCMDevice.objects.create(user=user1,
+                                  active=True,
+                                  registration_id='iid1')
+        APNSDevice.objects.create(user=user2,
+                                  active=False)
 
     def test_user_device_enrollment_anonymously(self):
         """
@@ -491,11 +493,6 @@ class UserDeviceTests(APITestCase):
         user = get_user_model().objects.get(username="22222222-4321-1234-abcd-4321abcd1234")
         self.assertIsNotNone(user)
         self.assertIsNotNone(user.groups.get(name="self-enrolled"))
-        # New user has default push preferences
-        push_prefs = UserDevice.objects.get(user=user)
-        self.assertIsNotNone(push_prefs)
-        self.assertFalse(push_prefs.wants_push_notifications)
-        self.assertIsNone(push_prefs.firebase_instance_id)
         # New user can be used to login
         self.assertTrue(self.client.login(
             username='22222222-4321-1234-abcd-4321abcd1234',
@@ -610,8 +607,9 @@ class UserDeviceTests(APITestCase):
         Ensures that when we PUT /api/push-settings anonymously, we get (401 unauthorized).
         """
         response = self.client.put('/api/push-settings',
-                                   {'notify_me': True,
-                                    'firebase_iid': 'iid-test'})
+                                   {'service':'apns',
+                                    'active': True,
+                                    'registration_id': 'iid-test'})
         self.assertEqual(response.status_code, 403)
 
     def test_user_device_push_settings_cannot_POST_user_device_anonymously(self):
@@ -619,8 +617,9 @@ class UserDeviceTests(APITestCase):
         Ensures that when we DELETE /api/push-settings anonymously, we get (401 unauthorized).
         """
         response = self.client.post('/api/push-settings',
-                                   {'notify_me': True,
-                                    'firebase_iid': 'iid-test'})
+                                   {'service':'apns',
+                                    'active': True,
+                                    'registration_id': 'iid-test'})
         self.assertEqual(response.status_code, 403)
 
     def test_user_device_push_settings_cannot_DELETE_user_device_anonymously(self):
@@ -637,14 +636,14 @@ class UserDeviceTests(APITestCase):
         self.client.login(username='test-user-numero-uno', password='password1')
         response = self.client.get('/api/push-settings')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, '{"notify_me":true}')
+        self.assertEqual(response.content, '{"active":true}')
 
     def test_user_device_push_settings_cannot_PUT_self(self):
         """
         Ensures that when we PUT /api/push-settings while logged in, we get (405 method not allowed).
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.put('/api/push-settings', {'notify_me': False})
+        response = self.client.put('/api/push-settings', {'service':'gcm','active': False})
         self.assertEqual(response.status_code, 405)
 
     def test_user_device_push_settings_cannot_DELETE_self(self):
@@ -660,93 +659,128 @@ class UserDeviceTests(APITestCase):
         Ensures that when we POST /api/push-settings while logged in, we get (200 and content).
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', data='{"notify_me": false}', content_type="application/json")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, '{"notify_me":false}')
+        response = self.client.post('/api/push-settings', data='{"service":"gcm","active": false}', content_type="application/json")
+        self.assertEqual(response.status_code, 200, '%d != 200, %s' % (response.status_code, response.content))
+        self.assertEqual(response.content, '{"active":false}')
         user = get_user_model().objects.get(username="test-user-numero-uno")
-        user_device = UserDevice.objects.get(user=user)
-        self.assertFalse(user_device.wants_push_notifications)
-        self.assertIsNone(user_device.firebase_instance_id)
+        user_device = find_device_for_user(user=user)
+        self.assertIsInstance(user_device, GCMDevice)
+        self.assertFalse(user_device.active)
+        # Registration ID is kept from whatever it was. There's a non-null constraint on it.
+        self.assertIsNotNone(user_device.registration_id)
 
     def test_user_device_push_settings_can_POST_self_to_clear_data_ignoring_iid(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we get (200 and content).
-        Ensures that a firebase_iid included in the request is cleared
+        Ensures that a registration_id included in the request is cleared
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', data='{"notify_me": false, "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
-        self.assertEqual(response.status_code, 200)
+        response = self.client.post('/api/push-settings', data='{"service":"gcm", "active": false, "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
+        self.assertEqual(response.status_code, 200, '%d != 200, %s' % (response.status_code, response.content))
         user = get_user_model().objects.get(username="test-user-numero-uno")
-        user_device = UserDevice.objects.get(user=user)
-        self.assertIsNone(user_device.firebase_instance_id)
+        user_device = find_device_for_user(user=user)
+        self.assertIsInstance(user_device, GCMDevice)
+        self.assertFalse(user_device.active)
+        self.assertEqual(user_device.registration_id, "1234-5678-abcdefgh")
 
     def test_user_device_push_settings_can_POST_self_to_set_data(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we get (204 no content).
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, '{"notify_me":true}')
+        response = self.client.post('/api/push-settings', '{"service":"gcm", "active": true, "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
+        self.assertEqual(response.status_code, 200, '%d != 200, %s' % (response.status_code, response.content))
+        self.assertEqual(response.content, '{"active":true}')
         user = get_user_model().objects.get(username="test-user-numero-uno")
-        user_device = UserDevice.objects.get(user=user)
-        self.assertTrue(user_device.wants_push_notifications)
-        self.assertEqual(user_device.firebase_instance_id, '1234-5678-abcdefgh')
+        user_device = find_device_for_user(user=user)
+        self.assertIsInstance(user_device, GCMDevice)
+        self.assertTrue(user_device.active)
+        self.assertEqual(user_device.registration_id, '1234-5678-abcdefgh')
+
+    def test_user_device_push_settings_cannot_POST_self_to_change_provider(self):
+        """
+        Ensures that we can't switch a registration from GCM to APNS
+        """
+        self.client.login(username='test-user-numero-uno', password='password1')
+        response = self.client.post('/api/push-settings', '{"service":"apns","active": true, "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"cannot switch from apns to gcm or vice versa"}')
+        user = get_user_model().objects.get(username="test-user-numero-uno")
+        user_device = find_device_for_user(user=user)
+        self.assertIsInstance(user_device, GCMDevice)
 
     def test_user_device_push_settings_cannot_POST_bad_input_1(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', '{"notify_me": "always", "firebase_iid": "1234-5678-abcdefgh"}', content_type="application/json")
+        response = self.client.post('/api/push-settings', '{"active": true, "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"detail":"notify_me should be true or false"}')
+        self.assertEqual(response.content, '{"detail":"service is required"}')
 
     def test_user_device_push_settings_cannot_POST_bad_input_2(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "1234"}', content_type="application/json")
+        response = self.client.post('/api/push-settings', '{"service": "unknown push messaging service", "active": true, "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"detail":"firebase_iid should be >16 and <=256"}')
+        self.assertEqual(response.content, '{"detail":"service should be one of [apns,gcm]"}')
 
     def test_user_device_push_settings_cannot_POST_bad_input_3(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        long_key = "".join(['a' for x in range(257)])
-        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": "%s"}' % (long_key,), content_type="application/json")
+        response = self.client.post('/api/push-settings', '{"service":"gcm","active": "always", "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"detail":"firebase_iid should be >16 and <=256"}')
+        self.assertEqual(response.content, '{"detail":"active should be true or false"}')
 
     def test_user_device_push_settings_cannot_POST_bad_input_4(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": null}', content_type="application/json")
+        response = self.client.post('/api/push-settings', '{"service":"gcm","active": true, "registration_id": "1234"}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"detail":"firebase_iid should be string"}')
+        self.assertEqual(response.content, '{"detail":"registration_id should be >16 and <=256"}')
 
     def test_user_device_push_settings_cannot_POST_bad_input_5(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', '{"notify_me": true}', content_type="application/json")
+        long_key = "".join(['a' for x in range(257)])
+        response = self.client.post('/api/push-settings', '{"service":"gcm","active": true, "registration_id": "%s"}' % (long_key,), content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"detail":"firebase_iid is required if notify_me is true"}')
+        self.assertEqual(response.content, '{"detail":"registration_id should be >16 and <=256"}')
 
     def test_user_device_push_settings_cannot_POST_bad_input_6(self):
         """
         Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', '{"notify_me": true, "firebase_iid": 42}', content_type="application/json")
+        response = self.client.post('/api/push-settings', '{"service":"gcm","active": true, "registration_id": null}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, '{"detail":"firebase_iid should be string"}')
+        self.assertEqual(response.content, '{"detail":"registration_id should be string"}')
+
+    def test_user_device_push_settings_cannot_POST_bad_input_7(self):
+        """
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
+        """
+        self.client.login(username='test-user-numero-uno', password='password1')
+        response = self.client.post('/api/push-settings', '{"service":"gcm","active": true}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"registration_id is required if active is true"}')
+
+    def test_user_device_push_settings_cannot_POST_bad_input_8(self):
+        """
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
+        """
+        self.client.login(username='test-user-numero-uno', password='password1')
+        response = self.client.post('/api/push-settings', '{"service":"gcm","active": true, "registration_id": 42}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"registration_id should be string"}')
 
 
 # Make us get stack traces instead of just warnings for "naive datetime".

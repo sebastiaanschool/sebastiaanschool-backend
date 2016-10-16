@@ -3,13 +3,14 @@ from datetime import datetime
 from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.models import Group
 from django.utils import timezone
+from push_notifications.models import APNSDevice, GCMDevice
 from rest_framework import permissions
 from rest_framework import views, viewsets
 from rest_framework.decorators import permission_classes
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 
-from backend.models import AgendaItem, Bulletin, ContactItem, Newsletter, TimelineItem, UserDevice
+from backend.models import AgendaItem, Bulletin, ContactItem, Newsletter, TimelineItem
 from backend.serializers import AgendaItemSerializer, BulletinSerializer, ContactItemSerializer, NewsletterSerializer, TimelineSerializer
 
 
@@ -143,7 +144,6 @@ class UserEnrollmentRPC(views.APIView):
         user.set_password(password)
         user.groups.add(group)
         user.save()
-        UserDevice.objects.create(user=user)
         return Response(data=None, status=204)
 
     @staticmethod
@@ -173,63 +173,75 @@ class UserPushSettingsRPC(views.APIView):
     """
     RPC endpoint for push notification settings
 
+    We're supporting just one device registration per user. That's because we don't have a user-visible login. Devices
+    self enroll with a random UUID username and password. There's one push registration per device.
+
     Allowed URL patterns:
     - GET     /api/push-settings
-    - POST    /api/push-settings   Request body: {"notify_me": boolean, "firebase_iid": string}
+    - POST    /api/push-settings   Request body: {"service": "gcm", "active": boolean, "registration_id": string}
 
     HTTPie test commands:
     $ http --auth zeventien-letters:zeventien-letters GET http://localhost:8000/api/push-settings
     $ http --json --auth zeventien-letters:zeventien-letters POST http://localhost:8000/api/push-settings \
-           notify_me:=true firebase_iid=zeventien-letters
+           service=apns active:=true registration_id=zeventien-letters
     $ http --json --auth zeventien-letters:zeventien-letters POST http://localhost:8000/api/push-settings \
-           notify_me:=false
+           service=apns active:=false
     """
-    JSON_NOTIFY_ME = 'notify_me'
-    JSON_FIREBASE_IID = 'firebase_iid'
+    JSON_SERVICE = 'service'
+    JSON_SERVICES = {'apns', 'gcm'}
+    JSON_ACTIVE = 'active'
+    JSON_REGISTRATION_ID = 'registration_id'
 
     parser_classes = (JSONParser,)
 
     # Manual validation like it's 1995. Sorry 'bout that.
     def post(self, request):
-        wants_notifications = False
-        if self.JSON_NOTIFY_ME in request.data:
-            wants_notifications = request.data[self.JSON_NOTIFY_ME]
-            if type(wants_notifications) is not bool:
-                return self.bad_request('notify_me should be true or false')
+        if self.JSON_SERVICE in request.data:
+            service = request.data[self.JSON_SERVICE]
+            if service not in self.JSON_SERVICES:
+                return self.bad_request('service should be one of [%s]' % ','.join(self.JSON_SERVICES))
+        else:
+            return self.bad_request('service is required')
 
-        firebase_iid = None
-        if self.JSON_FIREBASE_IID in request.data:
-            firebase_iid = request.data[self.JSON_FIREBASE_IID]
-            if type(firebase_iid) is not unicode:
-                return self.bad_request('firebase_iid should be string')
-            if not 16 < len(firebase_iid) <= 256:
-                return self.bad_request('firebase_iid should be >16 and <=256')
+        new_active = False
+        if self.JSON_ACTIVE in request.data:
+            new_active = request.data[self.JSON_ACTIVE]
+            if type(new_active) is not bool:
+                return self.bad_request('active should be true or false')
 
-        if wants_notifications and firebase_iid is None:
-            return self.bad_request('firebase_iid is required if notify_me is true')
+        new_registration_id = None
+        if self.JSON_REGISTRATION_ID in request.data:
+            new_registration_id = request.data[self.JSON_REGISTRATION_ID]
+            if type(new_registration_id) is not unicode:
+                return self.bad_request('registration_id should be string')
+            if not 16 < len(new_registration_id) <= 256:
+                return self.bad_request('registration_id should be >16 and <=256')
 
-        if not wants_notifications:
-            firebase_iid = None
+        if new_active and new_registration_id is None:
+            return self.bad_request('registration_id is required if active is true')
 
-        try:
-            ud = UserDevice.objects.get(user=request.user)
-            ud.wants_push_notifications=wants_notifications
-            ud.firebase_instance_id=firebase_iid
+        ud = find_device_for_user(user=request.user)
+        if ud is not None:
+            if (service == 'gcm' and not isinstance(ud, GCMDevice)) or\
+                    (service == 'apns' and not isinstance(ud, APNSDevice)):
+                return self.bad_request('cannot switch from apns to gcm or vice versa')
+            ud.active=new_active
+            # There's a non-null constraint on registration_id, so use the old value if we have no new one
+            ud.registration_id=new_registration_id if new_registration_id is not None else ud.registration_id
             ud.save()
-        except UserDevice.DoesNotExist:
-            ud = UserDevice.objects.create(user=request.user,
-                                           wants_push_notifications=wants_notifications,
-                                           firebase_instance_id=firebase_iid)
-        return Response(data={self.JSON_NOTIFY_ME: ud.wants_push_notifications}, status=200)
+        else:
+            device_class = APNSDevice if service == 'apns' else GCMDevice
+            ud = device_class.objects.create(user=request.user,
+                                             active=new_active,
+                                             registration_id=new_registration_id)
+        return Response(data={self.JSON_ACTIVE: ud.active}, status=200)
 
     def get(self, request):
         push_enabled = False
-        try:
-            ud = UserDevice.objects.get(user=request.user)
-            push_enabled = ud.wants_push_notifications
-        except UserDevice.DoesNotExist:
-            pass
-        body = {self.JSON_NOTIFY_ME: push_enabled}
+        ud = find_device_for_user(user=request.user)
+        if ud is not None:
+            push_enabled = ud.active
+        body = {self.JSON_ACTIVE: push_enabled}
         return Response(data=body, status=200)
 
     @staticmethod
@@ -243,3 +255,15 @@ class UserPushSettingsRPC(views.APIView):
     @staticmethod
     def bad_request(reason):
         return Response(data={'detail': reason}, status=400)
+
+
+def find_device_for_user(user):
+    try:
+        return APNSDevice.objects.get(user=user)
+    except APNSDevice.DoesNotExist:
+        pass
+    try:
+        return GCMDevice.objects.get(user=user)
+    except GCMDevice.DoesNotExist:
+        pass
+    return None

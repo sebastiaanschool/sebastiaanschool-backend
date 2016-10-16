@@ -688,7 +688,7 @@ class UserDeviceTests(APITestCase):
         Ensures that when we POST /api/push-settings while logged in, we get (204 no content).
         """
         self.client.login(username='test-user-numero-uno', password='password1')
-        response = self.client.post('/api/push-settings', '{"service":"gcm", "active": true, "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
+        response = self.client.post('/api/push-settings', '{"service":"gcm", "name":"Samsung SM-G930", "active": true, "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
         self.assertEqual(response.status_code, 200, '%d != 200, %s' % (response.status_code, response.content))
         self.assertEqual(response.content, '{"active":true}')
         user = get_user_model().objects.get(username="test-user-numero-uno")
@@ -696,6 +696,7 @@ class UserDeviceTests(APITestCase):
         self.assertIsInstance(user_device, GCMDevice)
         self.assertTrue(user_device.active)
         self.assertEqual(user_device.registration_id, '1234-5678-abcdefgh')
+        self.assertEqual(user_device.name, 'Samsung SM-G930')
 
     def test_user_device_push_settings_cannot_POST_self_to_change_provider(self):
         """
@@ -781,6 +782,25 @@ class UserDeviceTests(APITestCase):
         response = self.client.post('/api/push-settings', '{"service":"gcm","active": true, "registration_id": 42}', content_type="application/json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content, '{"detail":"registration_id should be string"}')
+
+    def test_user_device_push_settings_cannot_POST_bad_input_9(self):
+        """
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
+        """
+        self.client.login(username='test-user-numero-uno', password='password1')
+        response = self.client.post('/api/push-settings', '{"service":"gcm", "name":5, "active": true, "registration_id": "1234-5678-abcdefgh"}', content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"name should be string"}')
+
+    def test_user_device_push_settings_cannot_POST_bad_input_10(self):
+        """
+        Ensures that when we POST /api/push-settings while logged in, we handle bad input reasonably.
+        """
+        long_name = "".join(['a' for x in range(256)])
+        self.client.login(username='test-user-numero-uno', password='password1')
+        response = self.client.post('/api/push-settings', '{"service":"gcm", "name":"%s", "active": true, "registration_id": "1234-5678-abcdefgh"}' % (long_name,), content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, '{"detail":"name should be <256"}')
 
 
 # Make us get stack traces instead of just warnings for "naive datetime".

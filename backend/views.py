@@ -190,6 +190,7 @@ class UserPushSettingsRPC(views.APIView):
     JSON_SERVICE = 'service'
     JSON_SERVICES = {'apns', 'gcm'}
     JSON_ACTIVE = 'active'
+    JSON_NAME = 'name'
     JSON_REGISTRATION_ID = 'registration_id'
 
     parser_classes = (JSONParser,)
@@ -217,6 +218,14 @@ class UserPushSettingsRPC(views.APIView):
             if not 16 < len(new_registration_id) <= 256:
                 return self.bad_request('registration_id should be >16 and <=256')
 
+        new_name = None
+        if self.JSON_NAME in request.data:
+            new_name = request.data[self.JSON_NAME]
+            if type(new_name) is not unicode:
+                return self.bad_request('name should be string')
+            if len(new_name) > 255:
+                return self.bad_request('name should be <256')
+
         if new_active and new_registration_id is None:
             return self.bad_request('registration_id is required if active is true')
 
@@ -228,11 +237,13 @@ class UserPushSettingsRPC(views.APIView):
             ud.active=new_active
             # There's a non-null constraint on registration_id, so use the old value if we have no new one
             ud.registration_id=new_registration_id if new_registration_id is not None else ud.registration_id
+            ud.name=new_name if new_name is not None else ud.name
             ud.save()
         else:
             device_class = APNSDevice if service == 'apns' else GCMDevice
             ud = device_class.objects.create(user=request.user,
                                              active=new_active,
+                                             name=new_name,
                                              registration_id=new_registration_id)
         return Response(data={self.JSON_ACTIVE: ud.active}, status=200)
 

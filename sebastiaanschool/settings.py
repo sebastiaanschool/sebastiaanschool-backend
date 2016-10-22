@@ -165,3 +165,10 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(BASE_DIR,"static"),
 )
+
+PUSH_NOTIFICATIONS_SETTINGS = {
+    "GCM_API_KEY": os.environ.get("GCM_API_KEY"),
+    "APNS_CERTIFICATE": os.environ.get("APNS_CERT_FILE"),
+    # "WNS_PACKAGE_SECURITY_ID": "[your package security id, e.g: 'ms-app://e-3-4-6234...']",
+    # "WNS_SECRET_KEY": "[your app secret key, e.g.: 'KDiejnLKDUWodsjmewuSZkk']",
+}

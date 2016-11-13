@@ -32,7 +32,15 @@ if 'OPENSHIFT_REPO_DIR' in os.environ:
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = ['sebastiaan-appforce1.rhcloud.com', 'backend-sebastiaanschool.rhcloud.com']
+ALLOWED_HOSTS = [
+    'sebastiaan-appforce1.rhcloud.com',
+    'backend-sebastiaanschool.rhcloud.com',
+]
+if os.getenv("SEBASTIAAN_DEVELOP", False):
+    ALLOWED_HOSTS += [
+        'localhost',
+        '10.0.2.2',     # Host IP as seen from Android emulator
+    ]
 
 
 REST_FRAMEWORK = {
@@ -61,7 +69,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',   # TODO not suitable for production; serve /static/ from nginx instead
     'push_notifications',
     'rest_framework',
     'backend',

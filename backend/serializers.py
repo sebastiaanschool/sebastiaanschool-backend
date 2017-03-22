@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from backend.models import AgendaItem, Bulletin, ContactItem, Newsletter
-
+from django.contrib.auth import get_user_model
 
 class AgendaItemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -27,8 +27,13 @@ class NewsletterSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TimelineSerializer(serializers.Serializer):
+    url = serializers.SerializerMethodField()
     type = serializers.CharField()
     title = serializers.CharField()
     body = serializers.CharField(allow_blank=True)
     documentUrl = serializers.CharField(allow_blank=True)
     publishedAt = serializers.DateTimeField()
+
+    def get_url(self, obj):
+        # This is a bit fragile. Any changes in urls.py aren't reflected here.
+        return self.context['request'].build_absolute_uri('/api/%ss/%d/' % (obj.type, obj.pk))

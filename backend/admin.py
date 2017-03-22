@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from backend.models import AgendaItem, Bulletin, ContactItem, Newsletter
 
 # Register your models here.

@@ -32,7 +32,15 @@ if 'OPENSHIFT_REPO_DIR' in os.environ:
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = ['sebastiaan-appforce1.rhcloud.com', 'backend-sebastiaanschool.rhcloud.com']
+ALLOWED_HOSTS = [
+    'sebastiaan-appforce1.rhcloud.com',
+    'backend-sebastiaanschool.rhcloud.com',
+]
+if os.getenv("SEBASTIAAN_DEVELOP", False):
+    ALLOWED_HOSTS += [
+        'localhost',
+        '10.0.2.2',     # Host IP as seen from Android emulator
+    ]
 
 
 REST_FRAMEWORK = {
@@ -42,7 +50,15 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
     # The test client sends JSON instead of `x-www-form-urlencoded` payloads by default.
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+
+    # Use throttling to avoid user enumeration through the enrollment API
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'enrollment': '20/hour'
+    }
 }
 
 # Application definition
@@ -53,7 +69,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',   # TODO not suitable for production; serve /static/ from nginx instead
+    'push_notifications',
     'rest_framework',
     'backend',
 ]
@@ -156,3 +173,10 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(BASE_DIR,"static"),
 )
+
+PUSH_NOTIFICATIONS_SETTINGS = {
+    "GCM_API_KEY": os.environ.get("GCM_API_KEY"),
+    "APNS_CERTIFICATE": os.environ.get("APNS_CERT_FILE"),
+    # "WNS_PACKAGE_SECURITY_ID": "[your package security id, e.g: 'ms-app://e-3-4-6234...']",
+    # "WNS_SECRET_KEY": "[your app secret key, e.g.: 'KDiejnLKDUWodsjmewuSZkk']",
+}
